@@ -1,0 +1,4 @@
+# Only production-system is tracked; everything else in this folder stays local.
+/*
+!/production-system/
+!/.gitignore
