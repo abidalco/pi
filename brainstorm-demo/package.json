@@ -1,0 +1,16 @@
+{
+  "name": "pi-brainstorm",
+  "private": true,
+  "type": "module",
+  "description": "π production system · Section 1 Brainstorming — testable demo. Zero dependencies.",
+  "scripts": {
+    "start": "node server.mjs",
+    "reset": "node server.mjs --reset",
+    "bot": "bash bot/run.sh",
+    "wait": "node bot/wait.mjs",
+    "say": "node bot/say.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
