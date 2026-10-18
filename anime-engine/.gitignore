@@ -1,0 +1,5 @@
+node_modules/
+films/*/out/
+films/*/sound/
+__pycache__/
+.DS_Store

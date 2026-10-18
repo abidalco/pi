@@ -1,0 +1,323 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SORA Low Angle</title>
+<style>
+  :root { --ink: #eee9f6; --dim: #b4a8cc; --key: #ffb86b; --panel: rgba(20, 15, 32, .72); }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #120e1c; color: var(--ink); font: 12px/1.45 system-ui, sans-serif; }
+  canvas { display: block; }
+  #hud { position: fixed; left: 12px; top: 12px; background: var(--panel); padding: 10px 12px; border-radius: 8px; max-width: 300px; backdrop-filter: blur(6px); }
+  #hud b { font-size: 13px; } #hud kbd { color: var(--key); font: 11px ui-monospace, monospace; }
+  #lens { position: fixed; right: 14px; bottom: 12px; background: var(--panel); padding: 6px 10px; border-radius: 8px; font: 12px ui-monospace, monospace; color: var(--dim); }
+</style>
+</head>
+<body>
+<div id="hud"><b>SORA · low-angle close-up</b><br>
+  Drag to orbit · wheel changes lens · <kbd>C</kbd> back to the 45° low angle<br>
+  Faces <kbd>1</kbd> neutral <kbd>2</kbd> determined <kbd>3</kbd> smile <kbd>4</kbd> tired <kbd>5</kbd> shout · <kbd>B</kbd> blink · <kbd>Space</kbd> glint · <kbd>L</kbd> look at cursor
+</div>
+<div id="lens"></div>
+<script src="util.js"></script>
+<script src="world.js"></script>
+<script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/" } }</script>
+<script type="module">
+import * as THREE from 'three';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+
+// ---------------------------------------------------------------- renderer, 50 mm camera
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+document.body.appendChild(renderer.domElement);
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(30, innerWidth / innerHeight, .01, 300);
+camera.filmGauge = 36;                                   // full-frame: 50 mm reads like a real 50
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), .5, .55, .8);
+composer.addPass(bloom);
+composer.addPass(new OutputPass());
+
+// ---------------------------------------------------------------- toon materials + ink outlines
+const grad = new THREE.DataTexture(new Uint8Array([120, 255]), 2, 1, THREE.RedFormat);    // two tones: anime cel
+grad.minFilter = grad.magFilter = THREE.NearestFilter; grad.needsUpdate = true;
+// cel rim light: a hard fresnel edge in sunset orange instead of a second light (keeps the shading to two clean tones)
+const toon = (hex, o = {}) => {
+  const m = new THREE.MeshToonMaterial({ color: hex, gradientMap: grad, ...o });
+  m.onBeforeCompile = sh => { sh.fragmentShader = sh.fragmentShader.replace('#include <opaque_fragment>',
+    'float rimF = 1.0 - max(dot(normalize(vNormal), vec3(0.0, 0.0, 1.0)), 0.0);\n' +
+    'outgoingLight += vec3(1.0, .6, .36) * smoothstep(.62, .7, rimF) * .55;\n#include <opaque_fragment>'); };
+  return m;
+};
+const INK = new THREE.Color(0x21162a);
+const inkMat = w => new THREE.ShaderMaterial({
+  side: THREE.BackSide, uniforms: { w: { value: w } },
+  vertexShader: 'uniform float w; void main(){ gl_Position = projectionMatrix * modelViewMatrix * vec4(position + normal * w, 1.0); }',
+  fragmentShader: 'void main(){ gl_FragColor = vec4(0.08, 0.055, 0.12, 1.0); }',
+});
+function inked(geo, mat, w = .0035) {
+  const g = new THREE.Group(), m = new THREE.Mesh(geo, mat), o = new THREE.Mesh(geo, inkMat(w));
+  g.add(o, m); g.mesh = m; return g;
+}
+const PAL = { skin: 0xffd9c4, hair: 0x2d2e5e, jacket: 0x34437a, accent: 0xff8b2b, shirt: 0xf3eff6, scarf: 0xe2303e, ink: 0x21162a };
+
+// ---------------------------------------------------------------- canvas textures for the face
+function canvasTex(draw, w = 256, h = 256) {
+  const c = document.createElement('canvas'); c.width = w; c.height = h; draw(c.getContext('2d'), w, h);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t;
+}
+const EYE = {};
+function eyeTex(kind) {
+  return canvasTex(g => {
+    g.lineCap = g.lineJoin = 'round';
+    if (kind === 'closed' || kind === 'happy') {
+      g.strokeStyle = '#21162a'; g.lineWidth = 15; g.beginPath();
+      if (kind === 'closed') { g.moveTo(34, 128); g.quadraticCurveTo(128, 178, 222, 122); } else { g.moveTo(40, 160); g.quadraticCurveTo(128, 82, 216, 158); }
+      g.stroke(); return;
+    }
+    const top = kind === 'narrow' ? 104 : kind === 'tired' ? 122 : 58, inner = kind === 'narrow' ? 138 : 116;
+    g.save();
+    g.beginPath(); g.moveTo(30, 128); g.quadraticCurveTo(116, top - 44, 226, inner); g.quadraticCurveTo(150, 240, 30, 128); g.closePath();
+    g.fillStyle = '#fbf8ff'; g.fill(); g.clip();
+    const ir = g.createLinearGradient(0, 70, 0, 236);
+    ir.addColorStop(0, '#3c1407'); ir.addColorStop(.45, '#c45f12'); ir.addColorStop(1, '#ffcf5e');
+    g.fillStyle = ir; g.beginPath(); g.ellipse(134, 152, 54, 76, 0, 0, Math.PI * 2); g.fill();
+    g.lineWidth = 5; g.strokeStyle = '#3c1407'; g.stroke();
+    g.fillStyle = '#1b0905'; g.beginPath(); g.ellipse(136, 158, 24, 36, 0, 0, Math.PI * 2); g.fill();
+    g.fillStyle = 'rgba(70,40,110,.35)'; g.fillRect(0, 0, 256, top + 34);
+    g.fillStyle = '#fff'; g.beginPath(); g.ellipse(114, 118, 17, 13, -.5, 0, Math.PI * 2); g.fill();
+    g.beginPath(); g.arc(154, 186, 7, 0, Math.PI * 2); g.fill();
+    g.restore();
+    g.fillStyle = '#21162a'; g.beginPath();                         // heavy upper lash with an outer flick
+    g.moveTo(14, 148); g.quadraticCurveTo(20, 122, 34, 118); g.quadraticCurveTo(116, top - 58, 230, inner - 6);
+    g.quadraticCurveTo(116, top - 26, 40, 134); g.closePath(); g.fill();
+    g.lineWidth = 5; g.strokeStyle = '#21162a'; g.beginPath(); g.moveTo(50, 168); g.quadraticCurveTo(80, 200, 118, 206); g.stroke();
+  });
+}
+for (const k of ['open', 'narrow', 'tired', 'closed', 'happy']) EYE[k] = eyeTex(k);
+const MOUTH = {
+  neutral: canvasTex(g => { g.strokeStyle = '#21162a'; g.lineWidth = 9; g.lineCap = 'round'; g.beginPath(); g.moveTo(70, 128); g.quadraticCurveTo(128, 140, 186, 124); g.stroke(); }),
+  smile: canvasTex(g => { g.strokeStyle = '#21162a'; g.lineWidth = 10; g.lineCap = 'round'; g.beginPath(); g.moveTo(60, 112); g.quadraticCurveTo(128, 168, 196, 106); g.stroke(); }),
+  grit: canvasTex(g => { g.fillStyle = '#5e1427'; g.beginPath(); g.roundRect(64, 108, 128, 36, 14); g.fill(); g.fillStyle = '#fff'; g.fillRect(70, 112, 116, 12); g.strokeStyle = '#21162a'; g.lineWidth = 7; g.stroke(); }),
+  open: canvasTex(g => {
+    g.fillStyle = '#5e1427'; g.beginPath(); g.moveTo(70, 96); g.quadraticCurveTo(128, 88, 190, 96); g.quadraticCurveTo(178, 214, 128, 220); g.quadraticCurveTo(80, 214, 70, 96); g.fill();
+    g.save(); g.clip(); g.fillStyle = '#ec7680'; g.beginPath(); g.ellipse(128, 222, 56, 40, 0, 0, Math.PI * 2); g.fill(); g.fillStyle = '#fff'; g.fillRect(60, 90, 140, 16); g.restore();
+    g.strokeStyle = '#21162a'; g.lineWidth = 8; g.lineJoin = 'round'; g.stroke();
+  }),
+};
+const BROW = canvasTex(g => { g.strokeStyle = '#1c1a3a'; g.lineWidth = 22; g.lineCap = 'round'; g.beginPath(); g.moveTo(30, 150); g.quadraticCurveTo(120, 96, 226, 128); g.stroke(); });
+const decal = (tex, w, h) => new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -4, color: 0xf2e6ea }));
+
+// ---------------------------------------------------------------- SORA
+const sora = new THREE.Group(); scene.add(sora);
+const smooth = x => x * x * (3 - 2 * x);
+// torso / jacket / undershirt / collar
+const torso = new THREE.Group(); sora.add(torso);
+const shoulders = inked(new THREE.SphereGeometry(1, 40, 24), toon(PAL.jacket)); shoulders.scale.set(.2, .12, .125); shoulders.position.set(0, 1.405, -.005); torso.add(shoulders);
+const chest = inked(new THREE.CylinderGeometry(.16, .14, .36, 32), toon(PAL.jacket)); chest.position.set(0, 1.23, 0); torso.add(chest);
+const shirt = new THREE.Mesh(new THREE.SphereGeometry(1, 24, 16, -.5, 1, .9, 1.2), toon(PAL.shirt)); shirt.scale.set(.205, .125, .13); shirt.position.set(0, 1.4, 0); torso.add(shirt);
+for (const s of [-1, 1]) {   // orange sleeve stripes
+  const st = new THREE.Mesh(new THREE.TorusGeometry(.07, .012, 8, 28), toon(PAL.accent)); st.position.set(s * .17, 1.36, 0); st.rotation.set(0, Math.PI / 2, s * .4); torso.add(st);
+}
+// neck + scarf
+const neck = inked(new THREE.CylinderGeometry(.036, .042, .14, 20), toon(PAL.skin)); neck.position.set(0, 1.5, .005); sora.add(neck);
+const scarf = new THREE.Group(); sora.add(scarf);
+for (const [y, r] of [[1.468, .062], [1.505, .056]]) {
+  const t = inked(new THREE.TorusGeometry(r, .03, 14, 32), toon(PAL.scarf), .003); t.rotation.x = Math.PI / 2; t.position.y = y; t.scale.set(1.05, 1.15, 1); scarf.add(t);
+}
+const tails = [0, 1].map(i => {
+  const geo = new THREE.PlaneGeometry(.065 - i * .012, 1, 1, 18);
+  const m = new THREE.Mesh(geo, toon(PAL.scarf, { side: THREE.DoubleSide })); scene.add(m); return { m, geo, i };
+});
+// head (pivot at the top of the neck)
+const head = new THREE.Group(); head.position.set(0, 1.585, .012); sora.add(head);
+const fg = new THREE.SphereGeometry(.1, 64, 48), fp = fg.attributes.position;
+for (let i = 0; i < fp.count; i++) {
+  let x = fp.getX(i), y = fp.getY(i), z = fp.getZ(i);
+  if (y < 0) { const t = smooth(Math.min(1, -y / .1)); x *= 1 - .58 * t; z *= 1 - .3 * t; z += .036 * t * t; y *= 1 + .3 * t; }
+  if (z > 0) z *= .9;
+  if (y < -.06 && Math.abs(x) < .02 && z > .03) z += .006;
+  fp.setXYZ(i, x, y, z);
+}
+fg.computeVertexNormals();
+const face = inked(fg, toon(PAL.skin), .003); face.position.set(0, .085, 0); head.add(face);
+const F = new THREE.Group(); F.position.copy(face.position); head.add(F);     // face features share the skull's frame
+for (const s of [-1, 1]) {
+  const ear = inked(new THREE.SphereGeometry(1, 16, 12), toon(PAL.skin), .002); ear.scale.set(.012, .026, .018); ear.position.set(s * .097, -.006, -.012); F.add(ear);
+}
+const nose = new THREE.Mesh(new THREE.ConeGeometry(.005, .014, 6), toon(0xf6c4ae)); nose.rotation.x = Math.PI / 2; nose.position.set(0, -.026, .092); F.add(nose);
+const eyes = [-1, 1].map(s => {
+  const e = decal(EYE.open, .072, .072); e.position.set(s * .043, -.008, .085); e.rotation.set(-.1, s * .34, 0); e.scale.x = -s; F.add(e); return e;
+});
+const brows = [-1, 1].map(s => {
+  const b = decal(BROW, .056, .056); b.position.set(s * .044, .04, .086); b.rotation.set(-.12, s * .3, 0); b.scale.x = -s; F.add(b); return b;
+});
+const mouth = decal(MOUTH.neutral, .044, .044); mouth.position.set(0, -.062, .082); mouth.rotation.x = .25; F.add(mouth);
+const blush = decal(canvasTex(g => { g.strokeStyle = 'rgba(255,90,110,.75)'; g.lineWidth = 7; for (let i = 0; i < 4; i++) { g.beginPath(); g.moveTo(60 + i * 40, 100); g.lineTo(40 + i * 40, 150); g.stroke(); } }), .09, .045);
+blush.position.set(0, -.03, .088); blush.visible = false; F.add(blush);
+const sweat = new THREE.Sprite(new THREE.SpriteMaterial({ map: canvasTex(g => {
+  g.fillStyle = '#bfe6ff'; g.strokeStyle = '#3b6ea8'; g.lineWidth = 8; g.beginPath(); g.moveTo(128, 30); g.bezierCurveTo(180, 120, 196, 160, 196, 180); g.arc(128, 180, 68, 0, Math.PI); g.bezierCurveTo(60, 160, 76, 120, 128, 30); g.fill(); g.stroke();
+}), depthTest: false })); sweat.scale.set(.03, .03, 1); sweat.position.set(.075, .07, .06); sweat.visible = false; F.add(sweat);
+const glint = new THREE.Sprite(new THREE.SpriteMaterial({ map: canvasTex(g => {
+  g.translate(128, 128); g.fillStyle = '#fff'; g.shadowColor = '#ffd890'; g.shadowBlur = 24; g.beginPath();
+  for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4, r = i % 2 ? 10 : (i % 4 ? 60 : 118); g.lineTo(Math.cos(a) * r, Math.sin(a) * r); } g.fill();
+}), depthTest: false, blending: THREE.AdditiveBlending })); glint.scale.set(.07, .07, 1); glint.position.set(.03, 0, .1); glint.visible = false; F.add(glint);
+// hair: a cap plus swept spikes and bangs
+const hairMat = toon(PAL.hair);
+const hair = new THREE.Group(); F.add(hair);
+const cap = inked(new THREE.SphereGeometry(.107, 40, 24, 0, Math.PI * 2, 0, 1.75), hairMat, .003); cap.rotation.x = -.35; cap.position.set(0, .006, -.01); hair.add(cap);
+const spikes = [];
+const rnd = mulberry32(7);
+function spike(base, axis, len, rad) {
+  const g = new THREE.Group(), c = inked(new THREE.ConeGeometry(rad, len, 7), hairMat, .0028); c.position.y = len / 2; g.add(c);
+  g.position.copy(base); g.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), axis.clone().normalize()); hair.add(g);
+  spikes.push({ g, q0: g.quaternion.clone(), ph: rnd() * 6, amp: .04 + .06 * rnd(), len });
+}
+for (let i = 0; i < 30; i++) {              // crown and back: swept back and up
+  const az = Math.PI * (.35 + 1.3 * rnd()), el = .25 + 1.15 * rnd();
+  const dir = new THREE.Vector3(Math.sin(az) * Math.cos(el), Math.sin(el), Math.cos(az) * Math.cos(el));
+  if (dir.z > .35) continue;
+  spike(dir.clone().multiplyScalar(.092), dir.clone().add(new THREE.Vector3(0, .55, -.6)), .12 + .12 * rnd(), .026 + .014 * rnd());
+}
+for (let i = 0; i < 7; i++) {               // bangs over the forehead
+  const x = -.075 + i * .025, base = new THREE.Vector3(x, .062 - Math.abs(x) * .2, .07);
+  spike(base, new THREE.Vector3(x * 1.4 + (rnd() - .5) * .3, -1, .42), .05 + .03 * rnd() + (i === 3 ? .02 : 0), .017 + .006 * rnd());
+}
+for (const s of [-1, 1]) spike(new THREE.Vector3(s * .088, .01, .02), new THREE.Vector3(s * .25, -1, .1), .07, .016);   // sideburns
+
+// ---------------------------------------------------------------- the world: sunset dome, clouds, wires, fence, skyline
+const SUN = new THREE.Vector3(-.55, .32, -.77).normalize();
+const sky = new THREE.Mesh(new THREE.SphereGeometry(150, 48, 24), new THREE.ShaderMaterial({
+  side: THREE.BackSide, depthWrite: false, uniforms: { sun: { value: SUN } },
+  vertexShader: 'varying vec3 d; void main(){ d = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+  fragmentShader: `varying vec3 d; uniform vec3 sun;
+    vec3 band(float y){
+      vec3 c = mix(vec3(1.0,.89,.70), vec3(1.0,.64,.44), smoothstep(-.05,.10,y));
+      c = mix(c, vec3(.85,.47,.56), smoothstep(.08,.26,y)); c = mix(c, vec3(.50,.35,.63), smoothstep(.22,.48,y));
+      c = mix(c, vec3(.23,.23,.50), smoothstep(.45,.80,y)); return mix(c, vec3(.11,.13,.35), smoothstep(.78,1.0,y)); }
+    void main(){ float s = max(dot(d, sun), 0.0);
+      vec3 c = band(d.y) + vec3(1.0,.75,.45) * pow(s, 9.0) * .55 + vec3(1.0,.95,.82) * pow(s, 900.0) * 2.5;
+      gl_FragColor = vec4(c, 1.0); }`,
+}));
+scene.add(sky);
+const sunGlow = new THREE.Sprite(new THREE.SpriteMaterial({ map: canvasTex(g => {
+  const r = g.createRadialGradient(128, 128, 0, 128, 128, 128); r.addColorStop(0, 'rgba(255,250,230,1)'); r.addColorStop(.12, 'rgba(255,225,170,.85)'); r.addColorStop(.4, 'rgba(255,160,110,.25)'); r.addColorStop(1, 'rgba(255,140,120,0)');
+  g.fillStyle = r; g.fillRect(0, 0, 256, 256); }), blending: THREE.AdditiveBlending, depthWrite: false }));
+sunGlow.position.copy(SUN).multiplyScalar(120); sunGlow.scale.set(60, 60, 1); scene.add(sunGlow);
+// cel clouds painted with the 2D engine's cloud painter, hung high around the sky
+for (let i = 0; i < 9; i++) {
+  const r = mulberry32(300 + i), az = -1.2 + i * .42 + r() * .2, el = .35 + r() * .6, dist = 90;
+  const tex = canvasTex((g, w, h) => drawCloud(g, w / 2, h * .62, w * .44, h * .5, 400 + i * 17, [w * (.5 - Math.sin(az - Math.atan2(SUN.x, SUN.z)) * .8), h * 1.4]), 1024, 512);
+  const m = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, depthWrite: false, fog: false }));
+  m.position.set(Math.sin(az) * Math.cos(el) * dist, Math.sin(el) * dist, -Math.cos(az) * Math.cos(el) * dist);
+  m.scale.set(46 + r() * 30, 23 + r() * 15, 1); scene.add(m);
+}
+// utility wires overhead and a pole: the low angle sees straight up into them
+const wireMat = new THREE.LineBasicMaterial({ color: 0x1a1328 });
+for (let k = 0; k < 4; k++) {
+  const pts = []; for (let i = 0; i <= 40; i++) { const u = i / 40, x = -14 + 28 * u; pts.push(new THREE.Vector3(x, 6.4 + k * .35 - 1.6 * 4 * u * (1 - u) * (1 - k * .08), -2.6 - k * .25)); }
+  scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), wireMat));
+}
+const pole = new THREE.Mesh(new THREE.CylinderGeometry(.11, .13, 12, 10), new THREE.MeshBasicMaterial({ color: 0x1a1328 })); pole.position.set(-3.4, 2, -3.2); scene.add(pole);
+const arm = new THREE.Mesh(new THREE.BoxGeometry(1.8, .1, .1), pole.material); arm.position.set(-3.4, 6.5, -3.2); scene.add(arm);
+// rooftop fence and distant towers as dark silhouettes
+const fenceMat = new THREE.MeshBasicMaterial({ color: 0x2a2142 });
+for (let i = -6; i <= 6; i++) { const p = new THREE.Mesh(new THREE.BoxGeometry(.05, 2.1, .05), fenceMat); p.position.set(i * 1.3, 1.05, -2.2); scene.add(p); }
+const rail = new THREE.Mesh(new THREE.BoxGeometry(18, .06, .06), fenceMat); rail.position.set(0, 2.1, -2.2); scene.add(rail);
+const towerTex = canvasTex((g, w, h) => {
+  g.fillStyle = '#3a2d63'; g.fillRect(0, 0, w, h); const r = mulberry32(5);
+  for (let y = 8; y < h; y += 14) for (let x = 6; x < w; x += 12) if (r() < .14) { g.fillStyle = r() < .3 ? '#fff0c8' : '#ffb870'; g.fillRect(x, y, 6, 8); }
+}, 128, 512);
+for (const [x, z, w, hgt] of [[-9, -40, 5, 38], [-3.5, -46, 4, 30], [7, -42, 6, 44], [13, -50, 5, 26], [-15, -52, 7, 22]]) {
+  const t = new THREE.Mesh(new THREE.BoxGeometry(w, hgt, w), new THREE.MeshBasicMaterial({ map: towerTex, color: 0xb8a0d8 })); t.position.set(x, hgt / 2 - 6, z); scene.add(t);
+}
+
+// ---------------------------------------------------------------- lights: sunset back-rim, warm bounce from the roof, violet sky fill
+const key = new THREE.DirectionalLight(0xffe0c8, 2.1); key.position.set(1.8, .9, 2.4); scene.add(key); scene.add(new THREE.HemisphereLight(0xb39be0, 0x8a5068, 1.35));
+
+// ---------------------------------------------------------------- expressions
+const FACES = {
+  neutral: { eye: 'open', mouth: 'neutral', brow: 0 }, determined: { eye: 'narrow', mouth: 'neutral', brow: -1 },
+  smile: { eye: 'happy', mouth: 'smile', brow: .4 }, tired: { eye: 'tired', mouth: 'open', brow: 1, sweat: 1, blush: 1 },
+  shout: { eye: 'narrow', mouth: 'open', brow: -1 },
+};
+let faceName = 'neutral', blinkT = 0, glintT = -9, lookMouse = true;
+function setFace(n) { faceName = n; const f = FACES[n]; mouth.material.map = MOUTH[f.mouth]; mouth.material.needsUpdate = true; sweat.visible = !!f.sweat; blush.visible = !!f.blush; }
+
+// ---------------------------------------------------------------- camera: 45° below the face, 50 mm
+const target = new THREE.Vector3(0, 1.64, .05);
+const CAM0 = { az: .42, el: -.785, dist: .95, focal: 50 };
+const cam = { ...CAM0 };
+let drag = null;
+addEventListener('pointerdown', e => { drag = { x: e.clientX, y: e.clientY, az: cam.az, el: cam.el }; });
+addEventListener('pointerup', () => { drag = null; });
+const mouse = new THREE.Vector2();
+addEventListener('pointermove', e => {
+  mouse.set(e.clientX / innerWidth * 2 - 1, -(e.clientY / innerHeight * 2 - 1));
+  if (drag) { cam.az = drag.az - (e.clientX - drag.x) * .006; cam.el = THREE.MathUtils.clamp(drag.el + (e.clientY - drag.y) * .006, -1.35, .5); }
+});
+addEventListener('wheel', e => { cam.focal = THREE.MathUtils.clamp(cam.focal * (e.deltaY > 0 ? 1.06 : 1 / 1.06), 18, 135); }, { passive: true });
+addEventListener('keydown', e => {
+  const k = e.key.toLowerCase();
+  if ('12345'.includes(k)) setFace(['neutral', 'determined', 'smile', 'tired', 'shout'][+k - 1]);
+  if (k === 'b') blinkT = clock.elapsedTime;
+  if (k === ' ') { glintT = clock.elapsedTime; setFace('determined'); e.preventDefault(); }
+  if (k === 'c') Object.assign(cam, CAM0);
+  if (k === 'l') lookMouse = !lookMouse;
+});
+addEventListener('resize', () => { renderer.setSize(innerWidth, innerHeight); composer.setSize(innerWidth, innerHeight); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); });
+
+// ---------------------------------------------------------------- game loop
+const clock = new THREE.Clock();
+const headLook = new THREE.Euler(), tmpQ = new THREE.Quaternion(), axisX = new THREE.Vector3(1, 0, 0), axisZ = new THREE.Vector3(0, 0, 1);
+let nextBlink = 2.5;
+setFace('neutral');
+function frame() {
+  const t = clock.getElapsedTime();
+  // idle: breathing, head looks toward the cursor (or up into the wind)
+  const br = Math.sin(t * 1.7);
+  torso.scale.y = 1 + br * .008; torso.position.y = br * .002; neck.position.y = 1.5 + br * .002;
+  const lx = lookMouse ? mouse.x : 0, ly = lookMouse ? mouse.y : 0;
+  headLook.set(THREE.MathUtils.lerp(headLook.x, .3 - ly * .4, .08), THREE.MathUtils.lerp(headLook.y, .12 + lx * .55, .08), Math.sin(t * .7) * .025);
+  head.rotation.copy(headLook); head.position.y = 1.585 + br * .002;
+  sora.rotation.y = .2;
+  // blink + expression textures
+  if (t > nextBlink) { blinkT = t; nextBlink = t + 2.6 + Math.random() * 3; }
+  const f = FACES[faceName], blinking = t - blinkT < .11;
+  for (const e of eyes) { const m = blinking ? EYE.closed : EYE[f.eye]; if (e.material.map !== m) { e.material.map = m; e.material.needsUpdate = true; } }
+  brows.forEach((b, i) => { const s = i ? 1 : -1; b.position.y = .036 + f.brow * .006; b.rotation.z = s * f.brow * -.22; });
+  if (faceName === 'tired') { mouth.scale.y = .8 + .35 * (.5 + .5 * Math.sin(t * 7)); sweat.position.y = .07 - ((t * .05) % .05); } else mouth.scale.y = 1;
+  const ga = t - glintT; glint.visible = ga >= 0 && ga < .45; if (glint.visible) { const k = Math.sin(Math.PI * ga / .45); glint.scale.setScalar(.09 * k); glint.material.rotation = ga * 3; }
+  // wind through the hair
+  for (const s of spikes) { tmpQ.setFromAxisAngle(axisZ, Math.sin(t * 6 + s.ph) * s.amp).multiply(new THREE.Quaternion().setFromAxisAngle(axisX, Math.sin(t * 4.3 + s.ph * 1.7) * s.amp * .7)); s.g.quaternion.copy(s.q0).multiply(tmpQ); }
+  // scarf tails stream back and flutter (world space, from the back of the scarf)
+  const anchor = new THREE.Vector3(-.02, 1.49, -.05).applyMatrix4(sora.matrixWorld);
+  for (const { geo, i } of tails) {
+    const p = geo.attributes.position, n = p.count / 2;
+    for (let j = 0; j < n; j++) {
+      const u = j / (n - 1), wave = Math.sin(t * 9 - u * 7 + i * 2) * .07 * u, lift = Math.sin(t * 5.3 - u * 4 + i) * .04 * u;
+      const cx = anchor.x - .52 * u * (1 - i * .25) + wave * .3, cy = anchor.y - .05 * u + lift + .12 * u * u, cz = anchor.z - .3 * u + wave;
+      const w = (.034 - i * .006) * (.4 + .6 * Math.abs(Math.cos(t * 7 - u * 5 + i)));
+      p.setXYZ(j * 2, cx, cy + w, cz); p.setXYZ(j * 2 + 1, cx, cy - w, cz + w * .3);
+    }
+    p.needsUpdate = true; geo.computeVertexNormals();
+  }
+  // camera: orbit around the face, a breath of handheld drift
+  camera.setFocalLength(cam.focal);
+  const el = cam.el + Math.sin(t * .6) * .006, az = cam.az + Math.sin(t * .43) * .008;
+  camera.position.set(target.x + Math.sin(az) * Math.cos(el) * cam.dist, target.y + Math.sin(el) * cam.dist, target.z + Math.cos(az) * Math.cos(el) * cam.dist);
+  camera.lookAt(target);
+  document.getElementById('lens').textContent = `${cam.focal.toFixed(0)} mm · ${Math.round(-cam.el * 180 / Math.PI)}° below · ${(cam.dist * 100).toFixed(0)} cm`;
+  composer.render();
+  requestAnimationFrame(frame);
+}
+frame();
+window.DEMO = { setFace, cam };
+</script>
+</body>
+</html>

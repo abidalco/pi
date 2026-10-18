@@ -1,0 +1,410 @@
+{
+ "name": "cap",
+ "k": 0.052521008403361345,
+ "prop": {
+  "neck0": [
+   0.0,
+   37.31
+  ],
+  "neckLen": 0,
+  "shoulderN": [
+   -4.88,
+   32.11
+  ],
+  "shoulderF": [
+   7.95,
+   31.77
+  ],
+  "hipN": [
+   -3.67,
+   -0.11
+  ],
+  "hipF": [
+   4.93,
+   0.15
+  ],
+  "ua": 15.74,
+  "fa": 12.87,
+  "th": 16.29,
+  "sn": 18.96,
+  "sole": [
+   [
+    -3.68,
+    12.61
+   ],
+   [
+    6.83,
+    12.61
+   ]
+  ]
+ },
+ "parts": {
+  "head": {
+   "img": "head.png",
+   "pivot": [
+    104,
+    290
+   ],
+   "to": [
+    104,
+    6
+   ]
+  },
+  "torso": {
+   "img": "torso.png",
+   "pivot": [
+    189,
+    732
+   ],
+   "to": [
+    189,
+    22
+   ]
+  },
+  "upperArm": {
+   "img": "upperArm.png",
+   "pivot": [
+    86,
+    86
+   ],
+   "to": [
+    216,
+    356
+   ]
+  },
+  "forearm": {
+   "img": "forearm.png",
+   "pivot": [
+    50,
+    50
+   ],
+   "to": [
+    158,
+    270
+   ]
+  },
+  "hand": {
+   "img": "hand.png",
+   "pivot": [
+    36,
+    36
+   ],
+   "to": [
+    188,
+    98
+   ]
+  },
+  "thigh": {
+   "img": "thigh.png",
+   "pivot": [
+    95,
+    106
+   ],
+   "to": [
+    87,
+    416
+   ]
+  },
+  "shin": {
+   "img": "shin.png",
+   "pivot": [
+    105,
+    86
+   ],
+   "to": [
+    79,
+    446
+   ]
+  },
+  "foot": {
+   "img": "foot.png",
+   "pivot": [
+    77,
+    72
+   ],
+   "to": [
+    195,
+    72
+   ]
+  }
+ },
+ "faces": {
+  "smile": {
+   "img": "face_smile.png",
+   "pivot": [
+    90.3,
+    290.5
+   ],
+   "to": [
+    90.3,
+    6.5
+   ]
+  },
+  "determined": {
+   "img": "face_determined.png",
+   "pivot": [
+    94.0,
+    290.1
+   ],
+   "to": [
+    94.0,
+    6.1
+   ]
+  },
+  "closed": {
+   "img": "face_closed.png",
+   "pivot": [
+    114.2,
+    290.6
+   ],
+   "to": [
+    114.2,
+    6.6
+   ]
+  },
+  "pant": {
+   "img": "face_pant.png",
+   "pivot": [
+    114.9,
+    290.3
+   ],
+   "to": [
+    114.9,
+    6.3
+   ]
+  },
+  "shout": {
+   "img": "face_shout.png",
+   "pivot": [
+    108.6,
+    290.5
+   ],
+   "to": [
+    108.6,
+    6.5
+   ]
+  }
+ },
+ "sprites": {
+  "idle": {
+   "img": "spr_idle.png",
+   "k": 0.08512,
+   "anchor": [
+    94.6,
+    1174.8
+   ],
+   "mode": "ground",
+   "rot0": 0
+  },
+  "wave_a": {
+   "img": "spr_wave_a.png",
+   "k": 0.08134,
+   "anchor": [
+    81.9,
+    1166.4
+   ],
+   "mode": "ground",
+   "rot0": 0
+  },
+  "wave_b": {
+   "img": "spr_wave_b.png",
+   "k": 0.08715,
+   "anchor": [
+    119.0,
+    1158.6
+   ],
+   "mode": "ground",
+   "rot0": 0
+  },
+  "talk_a": {
+   "img": "spr_talk_a.png",
+   "k": 0.08319,
+   "anchor": [
+    102.3,
+    1169.4
+   ],
+   "mode": "ground",
+   "rot0": 0
+  },
+  "talk_b": {
+   "img": "spr_talk_b.png",
+   "k": 0.08319,
+   "anchor": [
+    80.4,
+    1155.0
+   ],
+   "mode": "ground",
+   "rot0": 0
+  },
+  "point": {
+   "img": "spr_point.png",
+   "k": 0.08715,
+   "anchor": [
+    75.0,
+    1134.0
+   ],
+   "mode": "ground",
+   "rot0": 0
+  },
+  "crouch": {
+   "img": "spr_crouch.png",
+   "k": 0.04658,
+   "anchor": [
+    125.8,
+    1032.0
+   ],
+   "mode": "ground",
+   "rot0": 0
+  },
+  "launch": {
+   "img": "spr_launch.png",
+   "k": 0.12388,
+   "anchor": [
+    297.9,
+    508.3
+   ],
+   "mode": "center",
+   "rot0": 0
+  },
+  "fly": {
+   "img": "spr_fly.png",
+   "k": 0.09867,
+   "anchor": [
+    562.7,
+    171.4
+   ],
+   "mode": "center",
+   "rot0": 76
+  },
+  "brake": {
+   "img": "spr_brake.png",
+   "k": 0.08873,
+   "anchor": [
+    566.8,
+    414.6
+   ],
+   "mode": "center",
+   "rot0": 0
+  },
+  "land": {
+   "img": "spr_land.png",
+   "k": 0.0732,
+   "anchor": [
+    487.1,
+    955.2
+   ],
+   "mode": "ground",
+   "rot0": 0
+  },
+  "land_look": {
+   "img": "spr_land_look.png",
+   "k": 0.07084,
+   "anchor": [
+    460.8,
+    1171.8
+   ],
+   "mode": "ground",
+   "rot0": 0
+  },
+  "tuck": {
+   "img": "spr_tuck.png",
+   "k": 0.06405,
+   "anchor": [
+    337.5,
+    439.9
+   ],
+   "mode": "center",
+   "rot0": 0
+  },
+  "stick": {
+   "img": "spr_stick.png",
+   "k": 0.061,
+   "anchor": [
+    572.7,
+    1026.0
+   ],
+   "mode": "ground",
+   "rot0": 0
+  },
+  "wobble": {
+   "img": "spr_wobble.png",
+   "k": 0.05612,
+   "anchor": [
+    149.1,
+    1125.0
+   ],
+   "mode": "ground",
+   "rot0": 0
+  },
+  "sit": {
+   "img": "spr_sit.png",
+   "k": 0.05631,
+   "anchor": [
+    981.7,
+    832.8
+   ],
+   "mode": "ground",
+   "rot0": 0
+  },
+  "sit_up": {
+   "img": "spr_sit_up.png",
+   "k": 0.05631,
+   "anchor": [
+    574.5,
+    1096.8
+   ],
+   "mode": "ground",
+   "rot0": 0
+  },
+  "hop": {
+   "img": "spr_hop.png",
+   "k": 0.061,
+   "anchor": [
+    408.2,
+    473.5
+   ],
+   "mode": "center",
+   "rot0": 0
+  },
+  "walk_1": {
+   "img": "spr_walk_1.png",
+   "k": 0.07547,
+   "anchor": [
+    471.1,
+    1174.2
+   ],
+   "mode": "ground",
+   "rot0": 0
+  },
+  "walk_2": {
+   "img": "spr_walk_2.png",
+   "k": 0.07547,
+   "anchor": [
+    493.1,
+    1179.0
+   ],
+   "mode": "ground",
+   "rot0": 0
+  },
+  "walk_3": {
+   "img": "spr_walk_3.png",
+   "k": 0.07625,
+   "anchor": [
+    270.4,
+    1145.4
+   ],
+   "mode": "ground",
+   "rot0": 0
+  },
+  "walk_4": {
+   "img": "spr_walk_4.png",
+   "k": 0.07625,
+   "anchor": [
+    123.9,
+    1191.6
+   ],
+   "mode": "ground",
+   "rot0": 0
+  }
+ }
+}
