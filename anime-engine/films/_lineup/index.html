@@ -1,0 +1,31 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>lineup</title>
+<style>* { margin: 0; } html, body { width: 1920px; height: 1080px; overflow: hidden; background: #f0e8f4; } canvas { position: absolute; inset: 0; }</style></head>
+<body><canvas id="c" width="1920" height="1080"></canvas>
+<script src="../../engine/util.js"></script><script src="../../engine/rig.js"></script><script src="../../engine/poses.js"></script>
+<script>
+// Scale check: every key drawing of a character standing on one floor line at world scale, next to the rig.
+const name = new URLSearchParams(location.search).get('char') || 'cap';
+useCharacter(name).then(() => {
+  const ctx = document.getElementById('c').getContext('2d');
+  const list = ['RIG', ...Object.keys(CHAR.sprites)];
+  window.FILM = { duration: 1, width: 1920, height: 1080, fps: 24 };
+  window.seek = () => {
+    ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.fillStyle = '#f0e8f4'; ctx.fillRect(0, 0, 1920, 1080);
+    const z = 2.2, per = 10;
+    list.forEach((s, i) => {
+      const row = Math.floor(i / per), col = i % per, ox = 110 + col * 185, oy = 470 + row * 500;
+      ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.fillStyle = '#c9b6d6'; ctx.fillRect(ox - 85, oy, 170, 2);
+      ctx.fillStyle = 'rgba(200,0,90,.5)'; ctx.fillRect(ox - 85, oy - 100 * z, 170, 1); ctx.fillRect(ox - 85, oy - 84 * z, 170, 1);
+      ctx.fillStyle = '#333'; ctx.font = '15px monospace'; ctx.fillText(s, ox - 80, oy + 22);
+      ctx.setTransform(z, 0, 0, z, ox, oy);
+      let p = plant(P(POSE.stand), 0); p.x = 0;
+      const sp = CHAR.sprites[s];
+      if (sp && sp.mode !== 'ground') { p.y = -48; p.rot = sp.rot0; }
+      p.spr = s === 'RIG' ? null : s;
+      drawChar(ctx, p, { L: { x: .9, y: -.3, s: 1.5, r: .5 }, lw: .5, t: 0 });
+    });
+  };
+  window.seek(0);
+});
+</script></body></html>

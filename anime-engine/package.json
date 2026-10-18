@@ -1,0 +1,13 @@
+{
+  "name": "anime-engine",
+  "private": true,
+  "type": "module",
+  "description": "Code-driven 2D anime film engine: films are data, rendered frame-exact to MP4.",
+  "scripts": {
+    "render": "node render.mjs",
+    "peek": "node engine/tools/peek.mjs"
+  },
+  "dependencies": {
+    "playwright": "^1.48.0"
+  }
+}
