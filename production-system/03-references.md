@@ -7,8 +7,12 @@
 The **source of truth for how things look and sound**: characters, locations and props that must stay the same across shots. The image, video and audio steps generate from them.
 
 ```
-Project → References (Character / Location / Prop) → Variants → Versions → used in Shots
+Home (Projects) → Project (e.g. a series) → References (Character / Location / Prop) → Variants → Versions → used in Shots
 ```
+
+- **References belong to a project.** Home lists the projects (e.g. "Al Mosalsal", "XXX"). Inside a project, References shows only that project's characters, locations and props
+- **In a series, references are shared by every episode:** Maya is made once and used in episodes 1–10
+- **Copy to another project:** a reference can be copied into another project. The two copies then change independently
 
 - **Rule of thumb:** if the script decides it, it's not a reference. Time of day, weather, temporary conditions (wet, crying, muddy) and the film's style/look come from the Script, and the image step applies them on top of the reference.
 
@@ -22,10 +26,10 @@ Project → References (Character / Location / Prop) → Variants → Versions �
 |---|---|
 | Description | Name, age, build, face, hair, distinguishing marks |
 | Sheet | Front / side / back, same pose and lighting |
-| Expressions | Neutral, happy, angry, sad, scared… (a grid of faces) |
+| Expressions | A default grid of 6 (neutral, happy, angry, sad, scared, surprised). Anyone can add more (smirk, disgusted, exhausted…) |
 | Motion | How they move: walk, posture, gestures, energy ("slouches, quick small steps"). Text first, an optional short clip later |
 | Outfits / style | Main outfit + others (work, pajamas, night out…) |
-| 🎙️ Voice (tab) | A text description that Audio generates from later (see below) |
+| 🎙️ Voice (tab) | A text description only. Voice samples are generated in **Audio** (see below) |
 
 **Voice description**
 
@@ -116,17 +120,19 @@ Script / Brainstorm ──► 🧑 Maya card (description filled in)
 |---|---|---|
 | 🌧️ Temporary | Wet, sweaty, crying, muddy | ❌ Not a variant. The image step reads it from the script |
 | 👕 Outfits | Work suit, pajamas | Character → Outfits |
-| 🩹 Lasting change | Scar from sc. 5 on, haircut, aged 10 years, burned café after the fire | ✅ **Variant** |
+| 🩹 Lasting change | Scar from Ep 1 · sc. 5 on, haircut, aged 10 years, burned café after the fire | ✅ **Variant** |
 
 - **Auto-variants:** when a **locked scene in the Main draft** introduces a lasting change, the tool creates the variant automatically, with an updated description and status **⏳ Awaiting generation**, starting from that scene
 - **Which variant a shot uses:** picked automatically from the scene range, with a manual override
+- **The range stays put:** if the scene where the change happens is moved, the variant's start scene does **not** follow automatically (some moves are flashbacks). The team updates it by hand
+- **Unused references:** if every scene that uses a reference is cut, the card stays in the gallery with a **Not used** badge
 
 ```
 Script sc. 5: "…the blade catches Maya's cheek, leaving a scar."
         ↓ (auto, once sc. 5 is locked in Main)
 🧑 Maya
- ├── Default    sc. 1–4   ✅ Approved
- └── Scarred    sc. 5 →   ⏳ Awaiting generation
+ ├── Default    Ep1 sc.1–4 ✅ Approved
+ └── Scarred    Ep1 sc.5 → ⏳ Awaiting generation
                           "Same as Default + thin scar, left cheek"
 ```
 
@@ -138,7 +144,7 @@ Script sc. 5: "…the blade catches Maya's cheek, leaving a scar."
 |---|---|
 | Generating options, fixing by prompt, editing descriptions | Anyone |
 | Approving a reference (or a variant) | **The reference's owner only** |
-| Owner | Assigned **per reference**, defaulting to the project's art lead |
+| Owner | **Whoever creates it** (+ Add), or for auto-created references, whoever locked the scene that created it. No team roles. The owner can be changed at any time |
 | Re-editing after approval | Allowed. Creates a new version (the old one is kept) and marks affected shots Stale |
 
 ## Reference lifecycle
@@ -185,7 +191,7 @@ The sketch below is a guide; the final visual design is left to the build.
 └──────────────────────────────────────────────────────────┘
           ↓ click
 ┌─────────────────────────────┬────────────────────────────┐
-│ 🧑 MAYA   Owner: Lena       │  ✨ GENERATE               │
+│ 🧑 MAYA   Owner: Hadi       │  ✨ GENERATE               │
 │ Description (AI-suggested)  │  [Generate] → 4 options    │
 │ Sheet: front·side·back      │  Fix: "add scar left…" [↻] │
 │ Expressions · Motion        │                            │
@@ -195,11 +201,13 @@ The sketch below is a guide; the final visual design is left to the build.
 └─────────────────────────────┴────────────────────────────┘
 ```
 
-**Status badges:** ✏️ Draft · ⏳ Awaiting generation · ⚙️ Generating · 👀 Review · ✅ Approved · ⚠️ Stale
+**Status badges:** ✏️ Draft · ⏳ Awaiting generation · ⚙️ Generating · 👀 Review · ✅ Approved · ⚠️ Stale · 💤 Not used
 
 ---
 
-## Addition to Section 2 (Script)
+## Additions to Section 2 (Script)
+
+- **Episodes on from v1:** projects can be series (Series → Episodes → Scenes → Shots). This replaces Script's "one film per project, Episodes later". Shot numbers are per episode (Ep 2 · 3.2), and variant ranges use episode + scene ("from Ep 2 · sc. 5")
 
 - **Look field on scenes:** the film's style/look (medium, palette, lighting, camera feel, mood board) is set in the Script per scene or sequence, since it can change between scenes (e.g. flashbacks in warm sepia). The image step applies it on top of the references
 
@@ -212,15 +220,16 @@ The sketch below is a guide; the final visual design is left to the build.
 3. Characters and locations are **created automatically** from the Script and Brainstorm cards. Props by hand. Gaps are filled with AI-suggested descriptions
 4. **Generate** via OpenAI (v1, model swappable): front view first, the rest from it, 3–4 options each time, fix by prompt. No personalities/twists
 5. **Variants = lasting changes only**, created automatically from locked scenes in Main, picked per shot by scene range with manual override
-6. **One owner per reference** (default: art lead) approves. Anyone can generate options. Re-editing after approval makes a new version and marks shots Stale (keep / regenerate / adjust)
-7. Shot references are filled in automatically. Each reference has a "Used in" list. The Judge checks text in v1, images later
+6. **One owner per reference** approves: whoever created it (or locked the scene that created it), changeable at any time. No team roles. Anyone can generate options. Re-editing after approval makes a new version and marks shots Stale (keep / regenerate / adjust)
+7. **Project-based:** Home lists projects. References belong to one project, are shared by all its episodes, and can be **copied** (not linked) into another project
+8. Shot references are filled in automatically. Each reference has a "Used in" list. The Judge checks text in v1, images later
 
-## Open questions (details, can be settled while building)
+9. Variant ranges stay fixed when scenes move (flashbacks). A reference with no scenes left stays visible as **Not used**
+10. Voice is a description only here, and samples are generated in Audio. Expressions: a default grid of 6, and anyone can add more
 
-- When an auto-variant's scene range changes (the scar scene moves), does the variant follow automatically?
-- What happens to a reference when its only scene is cut: archive it, or keep it?
-- Does Voice get a generated sample here as a preview, or only in Audio?
-- Exactly which expressions make up the default grid?
+## Open questions
+
+- None at concept level. Clickable mockup: `production-system/mockups/references.html`
 
 ## Next
 
