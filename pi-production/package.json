@@ -1,0 +1,18 @@
+{
+  "name": "pi-production",
+  "private": true,
+  "type": "module",
+  "description": "π production system — the app. Projects as the home page; Brainstorm and Script as sections inside a project. Zero dependencies.",
+  "scripts": {
+    "start": "node --disable-warning=ExperimentalWarning server.mjs",
+    "project": "node --disable-warning=ExperimentalWarning bin/project.mjs",
+    "bot": "bash bot/run.sh",
+    "auto": "node bot/auto.mjs",
+    "wait": "node bot/wait.mjs",
+    "say": "node bot/say.mjs",
+    "done": "node bot/done.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

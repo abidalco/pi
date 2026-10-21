@@ -1,0 +1,1098 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>π References Demo</title>
+<style>
+/* Demo of the References section inside π production. Same tokens and pieces as public/style.css; nothing here is wired to the app. */
+:root {
+  --bg: #f5f5f3; --surface: #ffffff; --ink: #121214; --t2: #6b6b70; --t3: #a3a3a8;
+  --hair: #e7e7e4; --hair-2: #cfcfcb; --hover: #f1f1ef;
+  --tint: #1b36a8; --tint-soft: #e9edf9; --danger: #b3261e; --danger-soft: #fdecea;
+  --ok: #1f7a4d; --warn: #b07800; --pie-off: #e9e9e6;
+  --ph: #ecebe7;
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Inter, Roboto, Arial, sans-serif;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 var(--font); letter-spacing: -0.005em; -webkit-font-smoothing: antialiased; }
+#app { min-height: 100vh; display: flex; flex-direction: column; }
+h1 { font-size: 30px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.1; margin: 0; }
+a { color: inherit; text-decoration: none; }
+b { font-weight: 600; }
+.muted { color: var(--t2); } .faint { color: var(--t3); } .small { font-size: 13px; } .grow { flex: 1; }
+:focus-visible { outline: 2px solid var(--tint); outline-offset: 2px; }
+.ic { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; vertical-align: -4px; flex: none; }
+.ic.s { width: 15px; height: 15px; vertical-align: -3px; }
+.ic.l { width: 22px; height: 22px; }
+
+button { font: inherit; font-size: 14px; color: inherit; background: var(--surface); border: 1px solid var(--hair-2); border-radius: 10px; padding: 7px 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; }
+button:hover { border-color: var(--ink); }
+button.primary { background: var(--ink); color: #fff; border-color: var(--ink); }
+button.ghost { background: transparent; border-color: transparent; color: var(--t2); }
+button.ghost:hover { color: var(--ink); background: var(--hover); }
+button.small { font-size: 13px; padding: 5px 11px; }
+.icon { width: 34px; height: 34px; padding: 0; justify-content: center; border-radius: 50%; border: 0; background: transparent; color: var(--t2); }
+.icon:hover, .icon.on { background: var(--hover); color: var(--ink); }
+input { font: inherit; color: inherit; background: var(--surface); border: 1px solid var(--hair-2); border-radius: 10px; padding: 9px 12px; width: 100%; }
+input:focus { outline: none; border-color: var(--ink); }
+.toast { position: fixed; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); left: 50%; transform: translateX(-50%); background: var(--ink); color: #fff; padding: 10px 16px; border-radius: 999px; font-size: 13.5px; z-index: 80; max-width: 90vw; }
+.democap { position: fixed; left: calc(14px + env(safe-area-inset-left, 0px)); bottom: calc(12px + env(safe-area-inset-bottom, 0px)); font-size: 11.5px; color: var(--t3); z-index: 5; pointer-events: none; }
+
+/* the header: row 1 = π · project · the four sections · people ⋯ ; row 2 = the section's own tabs */
+.head { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--surface); }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 21; background: var(--surface); }
+.top { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px; height: 56px; padding: 0 16px; border-bottom: 1px solid var(--hair); }
+.tl, .tr { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.tr { justify-content: flex-end; }
+.logo { font-size: 21px; font-weight: 500; width: 34px; height: 34px; display: inline-grid; place-items: center; border-radius: 10px; flex: none; }
+.logo:hover { background: var(--hover); }
+.pill { border-radius: 999px; padding: 4px 10px 4px 6px; gap: 8px; border-color: var(--hair); font-size: 14px; }
+.pill .pn { font-weight: 600; white-space: nowrap; }
+.pill .chev { width: 14px; height: 14px; color: var(--t3); }
+.tabs { display: flex; align-items: stretch; height: 56px; gap: 2px; }
+.tab { display: inline-flex; align-items: center; gap: 7px; padding: 0 13px; font-size: 14px; color: var(--t2); border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap; }
+.tab:hover { color: var(--ink); }
+.tab.on { color: var(--ink); font-weight: 600; border-bottom-color: var(--ink); }
+.tab.on .ic { color: var(--tint); }
+.sub { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px; height: 50px; padding: 0 16px; border-bottom: 1px solid var(--hair); }
+.sub .sl, .sub .sr { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.sub .sr { justify-content: flex-end; }
+.segs { display: flex; gap: 2px; background: var(--hover); padding: 3px; border-radius: 10px; }
+.seg { padding: 5px 14px; border-radius: 8px; font-size: 13px; color: var(--t2); white-space: nowrap; border: 0; background: transparent; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+.seg:hover { color: var(--ink); border: 0; }
+.seg.on { background: var(--surface); color: var(--ink); font-weight: 600; box-shadow: 0 1px 2px rgba(0,0,0,.06); }
+.seg.dim { opacity: .45; cursor: default; }
+.seg .n { color: var(--t3); font-weight: 400; font-variant-numeric: tabular-nums; }
+.badge { display: inline-block; min-width: 16px; padding: 0 5px; border-radius: 999px; background: var(--tint); color: #fff; font-size: 10.5px; line-height: 16px; text-align: center; font-weight: 600; }
+.people { display: flex; margin: 0 4px; }
+.av { width: 28px; height: 28px; border-radius: 50%; background: var(--hover); color: var(--t2); display: inline-grid; place-items: center; font-size: 12px; font-weight: 600; border: 2px solid var(--surface); margin-left: -7px; }
+.av:first-child { margin-left: 0; }
+.av.me { background: var(--ink); color: #fff; }
+.mini { width: 20px; height: 20px; border-radius: 50%; background: var(--hover); color: var(--t2); display: inline-grid; place-items: center; font-size: 10px; font-weight: 600; flex: none; }
+.mini.me { background: var(--ink); color: #fff; }
+
+.menuwrap { position: relative; display: inline-flex; }
+.menu { position: absolute; top: calc(100% + 6px); left: 0; z-index: 50; min-width: 240px; background: var(--surface); border: 1px solid var(--hair); border-radius: 14px; box-shadow: 0 12px 36px rgba(0,0,0,.09), 0 2px 6px rgba(0,0,0,.04); padding: 6px; display: flex; flex-direction: column; }
+.menu.right { left: auto; right: 0; }
+.mi { white-space: nowrap; border: 0; background: transparent; text-align: left; padding: 8px 10px; border-radius: 9px; font-size: 14px; width: 100%; justify-content: flex-start; display: flex; gap: 10px; align-items: center; color: var(--ink); }
+.mi:hover { background: var(--hover); border: 0; }
+.mi .ic { color: var(--t2); }
+.mi.cur { font-weight: 600; } .mi.cur .ic { color: var(--tint); }
+.mi .msub { color: var(--t3); font-weight: 400; font-size: 12.5px; margin-left: auto; padding-left: 12px; white-space: nowrap; }
+.mi.danger, .mi.danger .ic { color: var(--danger); }
+.mlabel { font-size: 11px; letter-spacing: .07em; text-transform: uppercase; color: var(--t3); font-weight: 600; padding: 8px 10px 4px; }
+.msep { height: 1px; background: var(--hair); margin: 6px 4px; }
+.pie { display: block; flex: none; }
+
+/* status: a dot and a word */
+.st { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--t2); white-space: nowrap; }
+.st i { width: 7px; height: 7px; border-radius: 50%; background: var(--t3); display: inline-block; }
+.st.s-ok i { background: var(--ok); } .st.s-review i { background: var(--tint); } .st.s-await i { background: var(--warn); }
+.st.s-gen i { background: var(--tint); animation: blink 1s ease-in-out infinite; } .st.s-stale i { background: var(--warn); } .st.s-stale { color: var(--warn); }
+.st.s-off i { background: transparent; border: 1.5px solid var(--t3); }
+@keyframes blink { 50% { opacity: .25; } }
+.tag { font-size: 11.5px; padding: 1px 8px; border-radius: 999px; background: var(--hover); color: var(--t2); white-space: nowrap; }
+.tag.ai { background: var(--tint-soft); color: var(--tint); }
+
+/* the page */
+.page { max-width: 1120px; width: 100%; margin: 0 auto; padding: 22px 24px 120px; }
+.attn { display: flex; align-items: center; gap: 8px; width: 100%; border: 0; background: transparent; padding: 6px 10px; margin: 0 -10px 14px; font-size: 13px; color: var(--t2); border-radius: 10px; text-align: left; }
+.attn:hover { background: var(--hover); border: 0; }
+.attn .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--tint); flex: none; }
+.attn .chev { width: 13px; height: 13px; color: var(--t3); }
+.attnlist { margin: -8px 0 18px; border: 1px solid var(--hair); border-radius: 14px; background: var(--surface); }
+.attnlist a { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-top: 1px solid var(--hair); font-size: 14px; }
+.attnlist a:first-child { border-top: 0; }
+.attnlist a:hover { background: var(--hover); }
+.attnlist .why { color: var(--t2); font-size: 13px; margin-left: auto; text-align: right; }
+
+/* the gallery */
+.rgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(176px, 1fr)); gap: 18px; }
+.rgrid.wide { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
+.rc { position: relative; display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--hair); border-radius: 16px; cursor: pointer; transition: border-color .15s, transform .15s, box-shadow .15s; }
+.rc:hover { border-color: var(--hair-2); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,0,0,.05); }
+.rc .frame { aspect-ratio: 3/4; position: relative; background: var(--ph); border-radius: 15px 15px 0 0; overflow: hidden; }
+.rc:has(.menu) { z-index: 10; }
+.rc .cardmw { display: contents; }
+.rc .cardmw .menu { top: 46px; left: 8px; right: 8px; min-width: 0; }
+.rgrid.props .rc .frame { aspect-ratio: 1/1; }
+.rgrid.wide .rc .frame { aspect-ratio: 16/10; }
+.rc .meta { padding: 10px 12px 12px; display: flex; flex-direction: column; gap: 3px; }
+.rc .nm { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+.rc .ln { font-size: 12.5px; color: var(--t2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rc .row { display: flex; align-items: center; gap: 8px; margin-top: 3px; }
+.rc .cmenu { position: absolute; top: 8px; right: 8px; opacity: 0; transition: opacity .12s; }
+.rc:hover .cmenu, .rc .cmenu.open { opacity: 1; }
+.rc .cmenu .icon { background: rgba(255,255,255,.92); }
+.rc.off .frame { opacity: .55; }
+.rc.new { align-items: center; justify-content: center; gap: 10px; color: var(--t2); background: transparent; border-style: dashed; min-height: 200px; }
+.rc.new:hover { color: var(--ink); transform: none; box-shadow: none; }
+.rc.new .plus { width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--hair-2); display: grid; place-items: center; }
+.rc.newform { padding: 16px; justify-content: center; gap: 10px; cursor: default; }
+.rc.newform:hover { transform: none; box-shadow: none; }
+.rc.newform .acts { display: flex; gap: 6px; }
+.frame .art, .slot .art, .opt .art { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.frame .ph { position: absolute; inset: 0; display: grid; place-items: center; color: var(--t3); }
+.frame .ph .ic { width: 30px; height: 30px; stroke-width: 1.3; }
+.frame .vo { position: absolute; left: 10px; bottom: 10px; }
+
+/* art: quiet placeholders, drawn in code */
+.art .bg { fill: var(--ph); } .art .bg1 { fill: #e9e8e3; } .art .bg2 { fill: #efeeea; } .art .bg3 { fill: #e6e6e2; }
+.art .sk { fill: #d3d0c8; } .art .h { fill: #3b3b40; } .art .h2 { fill: #8d8a84; }
+.art .fg { fill: color-mix(in srgb, var(--tint) 30%, #3b3b40); } .art .fg2 { fill: #a9a7a1; } .art .pants { fill: #5a5a60; }
+.art .ln { stroke: #4a4a50; stroke-width: 1.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.art .ln2 { stroke: #f1efe9; stroke-width: 1.4; fill: none; stroke-linecap: round; }
+.art .dk { fill: #3b3b40; } .art .m { fill: #c9c7c0; } .art .m2 { fill: #b9b7b0; } .art .far { fill: #dddcd6; }
+.art .fl { fill: #d6d4cd; } .art .wall { fill: #e1dfd9; } .art .wall2 { fill: #d9d7d0; } .art .win { fill: #f6f5f1; stroke: #9a988f; stroke-width: 1.5; }
+.art .lamp { fill: #f3e6bf; } .art .plaster { fill: #f0e3cf; stroke: #b9a98e; stroke-width: .8; }
+.art .pp { fill: #c8ab7f; stroke: #8f7650; stroke-width: 1.2; } .art .wax { fill: #9b2f2a; }
+.art .cv { fill: #8e8a76; } .art .cv2 { fill: #7c7864; } .art .tape { fill: #efe8c8; } .art .tt { font: 600 5px var(--font); fill: #4a4a50; letter-spacing: .02em; }
+.art .strip { stroke: #e9eef9; stroke-width: 3; }
+.art .aw { fill: color-mix(in srgb, var(--tint) 22%, #cfcdc6); } .art .aw2 { fill: #e9e7e1; }
+.art .hint { fill: none; stroke: #9a988f; stroke-width: 1; stroke-dasharray: 3 3; }
+
+/* a reference's room */
+.backl { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--t2); margin-bottom: 10px; }
+.backl:hover { color: var(--ink); }
+.rhead { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.rhead .rsub { width: 100%; font-size: 14px; color: var(--t2); margin-top: -4px; }
+.varpill { border-radius: 999px; padding: 4px 10px 4px 12px; font-size: 13px; border-color: var(--hair); }
+.varpill .chev { width: 13px; height: 13px; color: var(--t3); }
+.varpill.alt { border-color: var(--tint); color: var(--tint); background: var(--tint-soft); }
+.owner { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; color: var(--t2); border-radius: 999px; padding: 4px 10px 4px 5px; border-color: var(--hair); }
+.waits { font-size: 13px; color: var(--t2); }
+.inroom { margin-top: 18px; width: max-content; max-width: 100%; overflow-x: auto; }
+.rbody { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 32px; margin-top: 20px; align-items: start; }
+.sheet { display: grid; grid-template-columns: 2fr 1fr; gap: 10px; }
+.sheet .slot.big { grid-row: span 2; }
+.sheet.props { grid-template-columns: 2fr 1fr 1fr; }
+.sheet.props .slot.big { grid-row: span 2; }
+.slot { position: relative; border-radius: 12px; overflow: hidden; background: var(--ph); aspect-ratio: 3/4; }
+.sheet.props .slot { aspect-ratio: 1/1; }
+.slot.wide { aspect-ratio: 16/9; }
+.slot .slab { position: absolute; left: 8px; top: 8px; font-size: 11px; font-weight: 600; background: rgba(255,255,255,.9); color: var(--t2); padding: 1px 8px; border-radius: 999px; }
+.slot .sacts { position: absolute; left: 8px; right: 8px; bottom: 8px; display: flex; gap: 6px; justify-content: flex-end; opacity: 0; transition: opacity .12s; }
+.slot:hover .sacts { opacity: 1; }
+.slot .sacts button { background: rgba(255,255,255,.95); border-color: transparent; font-size: 12.5px; padding: 4px 10px; }
+.slot .sacts button:hover { border-color: var(--ink); }
+.slot.empty { background: transparent; border: 1px dashed var(--hair-2); display: grid; place-items: center; text-align: center; }
+.slot.empty .in { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 10px; font-size: 12.5px; color: var(--t3); }
+.slot.working { background: linear-gradient(100deg, var(--ph) 30%, #f8f8f6 50%, var(--ph) 70%); background-size: 220% 100%; animation: shimmer 1.1s linear infinite; }
+.slot.working .in, .opt.working .in { position: absolute; inset: 0; display: grid; place-items: center; font-size: 12.5px; color: var(--t2); }
+@keyframes shimmer { to { background-position: -220% 0; } }
+.flds { display: flex; flex-direction: column; }
+.fld { display: grid; grid-template-columns: 116px minmax(0, 1fr); gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--hair); }
+.fld:first-child { padding-top: 2px; }
+.fld .lb { font-size: 12.5px; color: var(--t2); padding-top: 2px; display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }
+.val { outline: none; border-radius: 6px; padding: 2px 6px; margin: -2px -6px; min-height: 26px; }
+.val:hover { background: var(--hover); }
+.val:focus { background: var(--surface); box-shadow: 0 0 0 1px var(--ink); }
+.val:empty::before { content: attr(data-ph); color: var(--t3); }
+.prose { font-size: 15px; line-height: 1.6; max-width: 640px; }
+.srcline { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--t2); margin-top: 16px; }
+.dirty { display: none; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 14px; padding: 10px 12px; border-radius: 12px; background: #fbf6ea; font-size: 13px; color: #6b5310; }
+.dirty.on { display: flex; }
+.usedin { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 28px; padding-top: 14px; border-top: 1px solid var(--hair); font-size: 13px; color: var(--t2); }
+.usedin .sn { font-variant-numeric: tabular-nums; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--hair); background: var(--surface); color: var(--ink); font-size: 12.5px; }
+.usedin a.sn:hover { border-color: var(--ink); }
+.usedin .vlink { margin-left: auto; color: var(--t2); display: inline-flex; gap: 6px; align-items: center; border: 0; background: transparent; padding: 0; font-size: 13px; }
+.usedin .vlink:hover { color: var(--ink); }
+.tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 14px; margin-top: 20px; }
+.tiles.wide { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+.tile .slot { aspect-ratio: 1/1; }
+.tiles.outfits .tile .slot { aspect-ratio: 3/4; }
+.tiles.wide .tile .slot { aspect-ratio: 16/9; }
+.tile .tn { font-size: 13.5px; font-weight: 600; margin-top: 8px; display: flex; gap: 6px; align-items: center; }
+.tile .td { font-size: 12.5px; color: var(--t2); line-height: 1.4; }
+.tile.add .slot { background: transparent; border: 1px dashed var(--hair-2); display: grid; place-items: center; cursor: pointer; color: var(--t2); }
+.tile.add .slot:hover { color: var(--ink); border-color: var(--ink); }
+.tile.add input { margin-top: 8px; font-size: 13px; padding: 6px 10px; }
+.voiceonly { border: 1px dashed var(--hair-2); border-radius: 16px; padding: 34px 24px; display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; color: var(--t2); }
+.voiceonly .ic { width: 34px; height: 34px; color: var(--t3); stroke-width: 1.3; }
+.regs { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
+.reg { display: inline-flex; align-items: center; gap: 8px; font-size: 13.5px; padding: 3px 12px 3px 3px; border: 1px solid var(--hair); border-radius: 999px; background: var(--surface); }
+.reg .face { width: 28px; height: 28px; border-radius: 50%; overflow: hidden; position: relative; background: var(--ph); }
+.reg .face svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.script-h { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12.5px; background: var(--hover); padding: 2px 8px; border-radius: 6px; color: var(--ink); }
+
+/* Generate: a panel that only appears when asked */
+.gen { position: fixed; top: calc(122px + env(safe-area-inset-top, 0px)); right: calc(16px + env(safe-area-inset-right, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); width: 380px; z-index: 30; display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--hair); border-radius: 18px; box-shadow: 0 18px 50px rgba(0,0,0,.12), 0 2px 8px rgba(0,0,0,.05); }
+.gen .gh { display: flex; align-items: flex-start; gap: 10px; padding: 14px 12px 10px 16px; border-bottom: 1px solid var(--hair); }
+.gen .gh .gt { font-weight: 600; }
+.gen .gh .gs { font-size: 12.5px; color: var(--t2); margin-top: 2px; }
+.gen .opts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 14px; overflow-y: auto; align-content: start; }
+.gen.wideopts .opts { grid-template-columns: 1fr; }
+.opt { position: relative; aspect-ratio: 3/4; border-radius: 12px; overflow: hidden; background: var(--ph); border: 0; padding: 0; cursor: pointer; display: block; }
+.gen.sq .opt { aspect-ratio: 1/1; }
+.gen.wideopts .opt { aspect-ratio: 16/9; }
+.opt::after { content: ""; position: absolute; inset: 0; border-radius: 12px; box-shadow: inset 0 0 0 2px transparent; transition: box-shadow .12s; }
+.opt:hover::after { box-shadow: inset 0 0 0 2px var(--ink); }
+.opt .use { position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); font-size: 12.5px; background: var(--ink); color: #fff; padding: 4px 12px; border-radius: 999px; opacity: 0; transition: opacity .12s; white-space: nowrap; }
+.opt:hover .use { opacity: 1; }
+.opt.working { cursor: default; background: linear-gradient(100deg, var(--ph) 30%, #f8f8f6 50%, var(--ph) 70%); background-size: 220% 100%; animation: shimmer 1.1s linear infinite; }
+.opt.working::after { display: none; }
+.gen .gfrom { padding: 0 16px 12px; font-size: 12.5px; color: var(--t2); line-height: 1.45; }
+.gen .gfrom b { color: var(--ink); font-weight: 600; }
+.gen .gf { margin-top: auto; padding: 12px; border-top: 1px solid var(--hair); display: flex; gap: 8px; }
+.gen .gf input { font-size: 13.5px; padding: 8px 12px; }
+
+/* Production glimpse */
+.scn { margin-bottom: 30px; }
+.scn h2 { font-size: 15px; font-weight: 600; margin: 0 0 10px; display: flex; gap: 10px; align-items: baseline; }
+.shot { display: grid; grid-template-columns: 168px minmax(0, 1fr); gap: 16px; padding: 14px; background: var(--surface); border: 1px solid var(--hair); border-radius: 14px; margin-bottom: 10px; }
+.shot .kf { aspect-ratio: 16/9; border-radius: 10px; border: 1px dashed var(--hair-2); display: grid; place-items: center; font-size: 12px; color: var(--t3); text-align: center; padding: 6px; }
+.shot .sh { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.shot .num { font-weight: 600; font-variant-numeric: tabular-nums; }
+.shot .fr { font-size: 12px; color: var(--t2); border: 1px solid var(--hair); border-radius: 6px; padding: 0 6px; }
+.shot .act { font-size: 14px; margin-top: 4px; }
+.rchips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+.rchip { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; padding: 3px 10px 3px 4px; border: 1px solid var(--hair); border-radius: 999px; background: var(--surface); color: var(--ink); }
+.rchip:hover { border-color: var(--ink); }
+.rchip .th { width: 20px; height: 20px; border-radius: 50%; overflow: hidden; position: relative; background: var(--ph); flex: none; }
+.rchip .th svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.rchip .th.sq { border-radius: 5px; }
+.rchip .q { color: var(--t2); }
+.rchip.warn { border-color: #ead9a8; background: #fbf6ea; }
+.rchip.addp { color: var(--t2); border-style: dashed; padding: 3px 10px; cursor: pointer; }
+.staleline { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 10px; font-size: 13px; color: #6b5310; background: #fbf6ea; border-radius: 10px; padding: 7px 10px; }
+a.btn { font-size: 13px; padding: 5px 11px; border: 1px solid var(--hair-2); border-radius: 10px; display: inline-flex; align-items: center; gap: 7px; background: var(--surface); color: var(--ink); white-space: nowrap; }
+a.btn:hover { border-color: var(--ink); }
+.ic.fill { fill: currentColor; stroke: none; }
+
+/* sound: a sample you can play */
+.player { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.play { width: 38px; height: 38px; border-radius: 50%; padding: 0; justify-content: center; background: var(--ink); color: #fff; border-color: var(--ink); flex: none; }
+.play:hover { background: #000; }
+.play .ic { width: 14px; height: 14px; }
+.wave { flex: 1; height: 34px; display: flex; align-items: center; gap: 2px; cursor: pointer; min-width: 0; overflow: hidden; }
+.wave i { flex: 1 1 0; min-width: 1px; border-radius: 2px; background: var(--hair-2); }
+.wave i.past { background: var(--tint); }
+.player.busy .wave i { animation: blink 1s ease-in-out infinite; }
+.ptime { font-size: 12px; color: var(--t2); font-variant-numeric: tabular-nums; width: 32px; text-align: right; flex: none; }
+.sample { border: 1px solid var(--hair); background: var(--surface); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.sample .sline { font-size: 14px; color: var(--ink); }
+.sample .smeta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 12.5px; color: var(--t2); }
+.sample .dirty { margin-top: 0; }
+.vrow { display: grid; grid-template-columns: 44px minmax(150px, 230px) minmax(0, 1fr) auto; gap: 16px; align-items: center; padding: 14px 16px; background: var(--surface); border: 1px solid var(--hair); border-radius: 14px; margin-bottom: 10px; }
+.vrow.hl { border-color: var(--tint); box-shadow: 0 0 0 3px var(--tint-soft); }
+.vrow .vf { width: 44px; height: 44px; border-radius: 50%; overflow: hidden; position: relative; background: var(--ph); display: grid; place-items: center; color: var(--t3); }
+.vrow .vf svg.art { position: absolute; inset: 0; width: 100%; height: 100%; }
+.vrow .vn { display: flex; flex-direction: column; min-width: 0; }
+.vrow .vn span { font-size: 12.5px; color: var(--t2); line-height: 1.4; }
+.vrow .vacts { display: flex; gap: 6px; align-items: center; }
+.secth { font-size: 15px; font-weight: 600; margin: 0 0 12px; display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+
+/* motion: a clip that loops like a gif */
+.clip { position: relative; aspect-ratio: 16/9; border-radius: 12px; overflow: hidden; background: var(--ph); }
+.clip video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.clip .slab { position: absolute; left: 8px; top: 8px; font-size: 11px; font-weight: 600; background: rgba(255,255,255,.9); color: var(--t2); padding: 1px 8px; border-radius: 999px; }
+.clip .cbar { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: rgba(0,0,0,.06); }
+.clip .cbar i { display: block; height: 100%; width: 0; background: var(--tint); }
+.clip .cplay { position: absolute; left: 8px; bottom: 10px; width: 32px; height: 32px; border-radius: 50%; padding: 0; justify-content: center; background: rgba(255,255,255,.95); border-color: transparent; opacity: 0; transition: opacity .12s; }
+.clip .cplay .ic { width: 12px; height: 12px; }
+.clip:hover .cplay, .clip.paused .cplay { opacity: 1; }
+.clip .sacts { position: absolute; right: 8px; bottom: 10px; display: flex; gap: 6px; opacity: 0; transition: opacity .12s; }
+.clip:hover .sacts { opacity: 1; }
+.clip .sacts button { background: rgba(255,255,255,.95); border-color: transparent; font-size: 12.5px; padding: 4px 10px; }
+.clip .sacts button:hover { border-color: var(--ink); }
+.clip.empty { background: transparent; border: 1px dashed var(--hair-2); }
+.clip .in { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; font-size: 12.5px; color: var(--t3); }
+.clip.working { background: linear-gradient(100deg, var(--ph) 30%, #f8f8f6 50%, var(--ph) 70%); background-size: 220% 100%; animation: shimmer 1.1s linear infinite; }
+.clip.working .in { color: var(--t2); }
+
+/* a location's parts */
+.tiles.areas { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 8px; }
+.tiles.areas .tile .slot { aspect-ratio: 16/9; }
+.tiles.areas .tn { font-size: 12.5px; margin-top: 6px; }
+.lrow { display: flex; gap: 14px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--hair); }
+.lrow .lt { width: 64px; height: 64px; border-radius: 10px; overflow: hidden; position: relative; flex: none; background: #1c1d23; }
+.lrow .lt.empty { background: transparent; border: 1px dashed var(--hair-2); }
+.lrow .lt.working { background: linear-gradient(100deg, var(--ph) 30%, #f8f8f6 50%, var(--ph) 70%); background-size: 220% 100%; animation: shimmer 1.1s linear infinite; }
+.lrow .lt svg.art { position: absolute; inset: 0; width: 100%; height: 100%; }
+.lrow .tn { font-size: 13.5px; font-weight: 600; }
+.lrow .td { font-size: 12.5px; color: var(--t2); line-height: 1.45; }
+@media (max-width: 720px) { .vrow { grid-template-columns: 44px minmax(0, 1fr); } .vrow .player, .vrow .vacts { grid-column: 1 / -1; } .tiles.areas { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.ghostpage { max-width: 760px; margin: 40px auto; padding: 0 24px; }
+.ghostpage .gl { height: 14px; border-radius: 7px; background: #ebebe8; margin: 14px 0; }
+.ghostpage p { color: var(--t2); font-size: 14px; }
+
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+@media (max-width: 900px) {
+  .rbody { grid-template-columns: 1fr; }
+  .gen { top: auto; left: calc(8px + env(safe-area-inset-left, 0px)); right: calc(8px + env(safe-area-inset-right, 0px)); bottom: calc(8px + env(safe-area-inset-bottom, 0px)); width: auto; height: 72vh; }
+}
+@media (max-width: 720px) {
+  .top { grid-template-columns: auto 1fr auto; padding: 0 8px; gap: 4px; }
+  .pill .pn, .pill .chev { display: none; }
+  .pill { padding: 4px; }
+  .tabs { justify-content: center; }
+  .tab { padding: 0 9px; }
+  .tab .tl2 { display: none; }
+  .tab.on .tl2 { display: inline; }
+  .people { display: none; }
+  .sub { grid-template-columns: 1fr auto; padding: 0 8px; }
+  .sub .sl { display: none; }
+  .sub .segs { overflow-x: auto; }
+  .page { padding: 16px 16px 100px; }
+  .rgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .rgrid.wide { grid-template-columns: 1fr; }
+  .shot { grid-template-columns: 1fr; }
+  .fld { grid-template-columns: 1fr; gap: 4px; }
+  .newlbl { display: none; }
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="toast" id="toast" hidden></div>
+<div class="democap">Demo · not connected to the app</div>
+<script>
+(() => {
+  const app = document.getElementById('app');
+  const toastEl = document.getElementById('toast');
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  let toastTimer;
+  const toast = (t) => { toastEl.textContent = t; toastEl.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => (toastEl.hidden = true), 3400); };
+  const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
+
+  // ------------------------------------------------------------ icons (the app's set + a few for this section)
+  const ICONS = {
+    plus: '<path d="M5 12h14M12 5v14"/>',
+    more: '<circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>',
+    chevron: '<path d="m6 9 6 6 6-6"/>',
+    back: '<path d="M19 12H5M11 18l-6-6 6-6"/>',
+    grid: '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
+    spark: '<path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.2 2.2M16.2 16.2l2.2 2.2M5.6 18.4l2.2-2.2M16.2 7.8l2.2-2.2"/><circle cx="12" cy="12" r="3"/>',
+    script: '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/>',
+    refs: '<rect x="3" y="3" width="8" height="10" rx="1.5"/><rect x="13" y="3" width="8" height="6" rx="1.5"/><rect x="13" y="11" width="8" height="10" rx="1.5"/><rect x="3" y="15" width="8" height="6" rx="1.5"/>',
+    film: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 4v16M17 4v16M3 9h4M3 15h4M17 9h4M17 15h4"/>',
+    user: '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+    key: '<circle cx="7.5" cy="15.5" r="4.5"/><path d="m10.7 12.3 9.3-9.3M17 6l2.5 2.5M14.5 8.5 17 11"/>',
+    pin: '<path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/>',
+    wave: '<path d="M3 12h1.5M7 9v6M10.5 5v14M14 8v8M17.5 10.5v3M21 12h-.5"/>',
+    sparkle: '<path d="M12 3.5l1.6 4.4 4.4 1.6-4.4 1.6L12 15.5l-1.6-4.4L6 9.5l4.4-1.6z"/><path d="M18.5 15l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7z"/>',
+    refresh: '<path d="M21 12a9 9 0 1 1-2.6-6.4M21 4v5h-5"/>',
+    edit: '<path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
+    check: '<path d="m5 12 5 5L20 7"/>',
+    x: '<path d="M18 6 6 18M6 6l12 12"/>',
+    history: '<path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5M12 7v5l3 2"/>',
+    copy: '<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/>',
+    trash: '<path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>',
+    book: '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>',
+    layers: '<path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/>',
+    alert: '<path d="M12 4 3 20h18z"/><path d="M12 10v4M12 17h.01"/>',
+    send: '<path d="M12 19V5M5 12l7-7 7 7"/>',
+    play: '<path d="M7 4.5v15l13-7.5z"/>',
+    pause: '<rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/>',
+  };
+  const ic = (n, c = '') => `<svg class="ic ${c}" viewBox="0 0 24 24" aria-hidden="true">${ICONS[n] || ''}</svg>`;
+
+  // ------------------------------------------------------------ the project's mark: one wedge per stage, now four
+  const STAGES = [['brainstorm', 'Brainstorm'], ['references', 'References'], ['script', 'Script'], ['production', 'Production']];
+  function pie(progress, color = '#1b36a8', size = 22) {
+    const N = STAGES.length, R = 28, c = 28;
+    const xy = (a) => { const r = ((a - 90) * Math.PI) / 180; return [(c + R * Math.cos(r)).toFixed(2), (c + R * Math.sin(r)).toFixed(2)]; };
+    const wedge = (a0, a1, fill) => { if (a1 - a0 <= 0.01) return ''; const [x0, y0] = xy(a0), [x1, y1] = xy(a1); return `<path d="M${c} ${c}L${x0} ${y0}A${R} ${R} 0 ${a1 - a0 > 180 ? 1 : 0} 1 ${x1} ${y1}Z" fill="${fill}"/>`; };
+    let body = '';
+    STAGES.forEach(([k], i) => { const a0 = (i * 360) / N, a1 = ((i + 1) * 360) / N; const f = progress[k] || 0; body += wedge(a0, a1, 'var(--pie-off)') + wedge(a0, a0 + (a1 - a0) * f, color); });
+    return `<svg class="pie" viewBox="0 0 56 56" width="${size}" height="${size}">${body}<circle cx="28" cy="28" r="27.25" fill="none" stroke="${color}" stroke-width="1.5" opacity=".9"/></svg>`;
+  }
+
+  // ------------------------------------------------------------ the demo's data: Rainline, the sample script the app ships
+  // Characters and locations come from the script (speakers, scene headings); props are added by hand.
+  const S = {
+    me: 'Hadi', orig: {}, calm: matchMedia('(prefers-reduced-motion: reduce)').matches, voiceDirty: {}, motionDirty: {}, clipPaused: {}, clipMaking: null, remaking: {}, playing: null, menu: null, attnOpen: false, gen: null, newForm: null, adding: null, dirty: {}, variant: {},
+    refs: [
+      { id: 'maya', kind: 'character', name: 'Maya', line: 'Early 30s · courier', owner: 'Hadi', source: 'From the script · speaks in sc. 1, 2, 3', looks: ['short', 'bun', 'long', 'swept'],
+        fields: [['age', 'Age', 'Early 30s'], ['build', 'Build', 'Wiry, a cyclist’s legs, narrow shoulders'], ['face', 'Face', 'Sharp cheekbones, a nose broken once, steady eyes'], ['hair', 'Hair', 'Black, cropped short above the ears'], ['marks', 'Marks', 'Thin scar through the left eyebrow']], ai: [],
+        variants: [
+          { id: 'default', name: 'Default', range: 'sc. 1–3', status: 'approved', version: 2, sheet: { front: { opt: 0 }, side: { opt: 0 }, back: { opt: 0 } }, usedIn: ['1.1', '1.2', '1.4', '2.1', '2.2', '3.1', '3.3', '3.4'] },
+          { id: 'cut', name: 'Cut cheek', range: 'from sc. 4', status: 'awaiting', version: 0, auto: 'Made when sc. 4 “Chase” was locked in Main', delta: 'Same as Default, plus a fresh cut on the right cheek with a plaster over it', sheet: {}, usedIn: ['4.1', '4.2'] },
+        ],
+        expressions: [['neutral'], ['happy'], ['angry'], ['sad'], ['scared'], ['surprised'], ['smirk', 'Abdallah']], exprDone: true,
+        outfits: [{ id: 'courier', name: 'Courier', note: 'Black rain shell, reflective strip, satchel across the back', main: true, strip: true, done: true }, { id: 'home', name: 'At home', note: 'Grey hoodie, bare feet (sc. 2)', tone: 'fg2', done: true }],
+        motion: 'Economical and fast. Leans into the bike and stands on the pedals at lights. On foot she never runs if she can glide, and she stops dead, with no wind-down.',
+        voice: [['Age / gender feel', 'Early 30s, female'], ['Pitch / tone', 'Low, a little dry'], ['Accent', 'Local, clipped'], ['Pace / rhythm', 'Short answers after long pauses'], ['Emotional range', 'Flat on the surface; the heat is in what she doesn’t say'], ['Sample line', '“I don’t read them. That’s the job.”']] },
+      { id: 'omar', kind: 'character', name: 'Omar', line: '40s · the caller', owner: 'Abdallah', source: 'From the script · speaks in sc. 2, 3', looks: ['swept', 'short', 'swept', 'bun'],
+        fields: [['age', 'Age', '40s'], ['build', 'Build', 'Tall, heavy-set, moves carefully'], ['face', 'Face', 'Tired, kind eyes, two days of stubble'], ['hair', 'Hair', 'Grey at the temples, swept back'], ['marks', 'Marks', '']], ai: ['build', 'face', 'hair'],
+        variants: [{ id: 'default', name: 'Default', range: 'sc. 2–3', status: 'review', version: 1, sheet: { front: { opt: 2 }, side: { opt: 2 }, back: { opt: 2 } }, usedIn: ['2.3', '3.2', '3.5'] }],
+        expressions: [['neutral'], ['happy'], ['angry'], ['sad'], ['scared'], ['surprised']], exprDone: true,
+        outfits: [{ id: 'suit', name: 'Suit', note: 'Dark suit, no tie, no umbrella', main: true, done: true }],
+        motion: 'Slow and deliberate. Hands always where you can see them. One step, then he waits.',
+        voice: [['Age / gender feel', '40s, male'], ['Pitch / tone', 'Soft, low, never raised'], ['Accent', 'Hard to place'], ['Pace / rhythm', 'Slow; lets silences sit'], ['Emotional range', 'Gentle, with something held back'], ['Sample line', '“Somebody who needs you not to open it.”']], voiceAi: true },
+      { id: 'dispatch', kind: 'character', name: 'Dispatch', line: 'A voice on the radio', owner: 'Hadi', voiceOnly: true, source: 'From the script · heard in sc. 1 (V.O.)', looks: ['short', 'swept', 'bun', 'long'],
+        fields: [['age', 'Age', ''], ['build', 'Build', ''], ['face', 'Face', ''], ['hair', 'Hair', ''], ['marks', 'Marks', '']], ai: [],
+        variants: [{ id: 'default', name: 'Default', range: 'sc. 1', status: 'draft', version: 0, sheet: {}, usedIn: ['1.3'] }],
+        expressions: [['neutral'], ['happy'], ['angry'], ['sad'], ['scared'], ['surprised']], exprDone: false, outfits: [], motion: '',
+        voice: [['Age / gender feel', '50s, male'], ['Pitch / tone', 'Gravel, squeezed through the radio'], ['Accent', 'Local'], ['Pace / rhythm', 'Rapid, numbers first'], ['Emotional range', 'Bored; one notch of warmth for Maya'], ['Sample line', '“Maya. One more. Pick-up at the port, drop at the old cinema. Triple rate.”']], voiceAi: true },
+
+      { id: 'envelope', kind: 'prop', name: 'The envelope', line: 'Hand-sized · paper', owner: 'Hadi', source: 'Added by Hadi', looks: [0, 1, 2, 3],
+        fields: [['what', 'What it is', 'A5 kraft envelope, wax-sealed'], ['material', 'Material', 'Heavy brown paper, red wax'], ['color', 'Colour', 'Brown, an address in faded blue ink'], ['details', 'Details', 'No name on it. The seal is pressed with a fish.']], ai: [],
+        variants: [{ id: 'default', name: 'Default', range: 'everywhere', status: 'approved', version: 1, sheet: { front: { opt: 0 }, side: { opt: 0 }, back: { opt: 0 }, top: { opt: 0 }, scale: { opt: 0 } }, usedIn: ['1.2', '2.1', '3.1', '3.3'] }],
+        states: [{ id: 'sealed', name: 'Sealed', note: 'As it arrives', main: true, done: true }, { id: 'open', name: 'Torn open', note: 'For the fish market scene', done: true }] },
+      { id: 'satchel', kind: 'prop', name: 'Courier satchel', line: 'Worn on the back · canvas', owner: 'Abdallah', source: 'Added by Abdallah', looks: [0, 1, 2, 3],
+        fields: [['what', 'What it is', 'A one-strap courier bag'], ['material', 'Material', 'Waxed canvas, brass buckle'], ['color', 'Colour', 'Olive, faded to grey at the corners'], ['details', 'Details', 'Tape on the strap, NEVER OPEN in marker']], ai: [],
+        variants: [{ id: 'default', name: 'Default', range: 'everywhere', status: 'review', version: 1, sheet: { front: { opt: 1 }, side: { opt: 1 }, back: { opt: 1 }, top: { opt: 1 }, scale: { opt: 1 } }, usedIn: ['1.1', '1.2', '4.1'] }],
+        states: [{ id: 'default', name: 'As is', main: true, done: true }] },
+      { id: 'bike', kind: 'prop', name: 'The bicycle', line: 'Waist-high · steel', owner: 'Hadi', source: 'Added by Hadi', looks: [0, 1, 2, 3],
+        fields: [['what', 'What it is', 'A single-speed road bike'], ['material', 'Material', 'Steel frame, worn bar tape'], ['color', 'Colour', 'Matte black, scuffed'], ['details', 'Details', 'One brake, no lights, a bent rear mudguard']], ai: [],
+        variants: [{ id: 'default', name: 'Default', range: 'everywhere', status: 'draft', version: 0, sheet: {}, usedIn: ['1.1', '1.4'] }],
+        states: [] },
+
+      { id: 'bridge', kind: 'location', name: 'Ring road bridge', place: 'bridge', heading: 'EXT. RING ROAD BRIDGE – NIGHT', line: 'Exterior · sc. 1', owner: 'Hadi', source: 'From the script · the heading of sc. 1', looks: [0, 1, 2, 3],
+        fields: [['what', 'What it is', 'A six-lane ring road on a concrete bridge over the port'], ['mood', 'Mood', 'Exposed and loud'], ['era', 'Era', 'Now'], ['details', 'Key details', 'Buses in both lanes, a lamp post every thirty metres, port cranes behind']], ai: ['mood'],
+        variants: [{ id: 'default', name: 'Default', status: 'approved', version: 1, sheet: { layout: { opt: 0 } }, usedIn: ['1.1', '1.2', '1.3', '1.4'] }],
+        areas: [{ id: 'lane', name: 'Bus lane', crop: [96, 86, 150, 84], scenes: 'sc. 1', done: true }], regulars: [] },
+      { id: 'flat', kind: 'location', name: 'Maya’s flat', place: 'flat', heading: 'INT. MAYA’S FLAT – NIGHT', line: 'Interior · sc. 2', owner: 'Hadi', source: 'From the script · the heading of sc. 2', looks: [0, 1, 2, 3],
+        fields: [['what', 'What it is', 'One room and a kitchen corner, top floor'], ['mood', 'Mood', 'Bare, temporary, a single bulb'], ['era', 'Era', 'Now'], ['details', 'Key details', 'The window on the left, the table under the bulb, the door on the right']], ai: ['mood', 'details'],
+        variants: [{ id: 'default', name: 'Default', status: 'review', version: 1, sheet: { layout: { opt: 0 } }, usedIn: ['2.1', '2.2', '2.3'] }],
+        areas: [{ id: 'table', name: 'Kitchen table', crop: [104, 62, 150, 84], scenes: 'sc. 2', done: true }, { id: 'door', name: 'Front door', crop: [196, 34, 124, 70], scenes: 'sc. 2', done: true }], regulars: ['maya'] },
+      { id: 'roof', kind: 'location', name: 'The roof', place: 'roof', heading: 'EXT. ROOF – NIGHT', line: 'Exterior · sc. 3', owner: 'Abdallah', source: 'From the script · the heading of sc. 3', looks: [0, 1, 2, 3],
+        fields: [['what', 'What it is', 'The flat roof of Maya’s building'], ['mood', 'Mood', 'High, open, nowhere to hide'], ['era', 'Era', 'Now'], ['details', 'Key details', 'Two water tanks, the stairwell hut, a knee-high ledge over the street']], ai: [],
+        variants: [{ id: 'default', name: 'Default', status: 'approved', version: 1, sheet: { layout: { opt: 0 } }, usedIn: ['3.1', '3.2', '3.3', '3.4', '3.5'] }],
+        areas: [{ id: 'ledge', name: 'Ledge', crop: [190, 70, 130, 73], scenes: 'sc. 3', done: true }, { id: 'tanks', name: 'Water tanks', crop: [14, 40, 130, 73], scenes: 'sc. 3', done: true }, { id: 'stair', name: 'Stairwell door', crop: [104, 50, 130, 73], scenes: 'sc. 3', done: true }], regulars: [] },
+      { id: 'alleys', kind: 'location', name: 'Market alleys', place: 'alleys', heading: 'EXT. MARKET ALLEYS – NIGHT', line: 'Exterior · sc. 4', owner: 'Hadi', source: 'From the script · the heading of sc. 4', looks: [0, 1, 2, 3],
+        fields: [['what', 'What it is', 'Narrow alleys behind the old market'], ['mood', 'Mood', 'Tight, wet stone, too many corners'], ['era', 'Era', 'Old city'], ['details', 'Key details', 'A fire escape down the left wall, a doorway on the right']], ai: ['what', 'mood', 'era', 'details'],
+        variants: [{ id: 'default', name: 'Default', status: 'draft', version: 0, sheet: {}, usedIn: ['4.1', '4.2'] }],
+        areas: [{ id: 'fire', name: 'Fire escape', crop: [0, 8, 150, 84], scenes: 'sc. 4', done: false }], regulars: [] },
+      { id: 'fish', kind: 'location', name: 'Fish market', place: 'fish', heading: 'EXT. FISH MARKET – DAWN', line: 'Exterior · a scene not placed yet', owner: 'Hadi', notUsed: true, source: 'From the script · a scene that isn’t placed', looks: [0, 1, 2, 3],
+        fields: [['what', 'What it is', 'The covered fish market by the port'], ['mood', 'Mood', ''], ['era', 'Era', ''], ['details', 'Key details', '']], ai: ['what'],
+        variants: [{ id: 'default', name: 'Default', status: 'draft', version: 0, sheet: {}, usedIn: [] }],
+        areas: [], regulars: [] },
+    ],
+    // the shots Script already makes (Shots tab), with the references filled in from who's in frame and where
+    stale: { '3.4': { ref: 'maya', was: 1 } },
+  };
+  // real media, made on this Mac: voices with `say` + ffmpeg, clips as SVG frames → MP4 (sources in media-src/)
+  const MEDIA = {
+    voice: { maya: { src: 'media/voice-maya.mp3', dur: 2.35, peaks: [0.71, 1.0, 0.88, 0.87, 0.4, 0.46, 0.83, 0.79, 0.82, 0.45, 0.24, 0.62, 0.73, 0.74, 0.74, 0.33, 0.19, 0.82, 0.73, 0.76, 0.74, 0.6, 0.39, 0.3, 0.18, 0.01, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.23, 0.71, 0.69, 0.61, 0.03, 0.02, 0.02, 0.7, 0.68, 0.22, 0.25, 0.76, 0.92, 0.91, 0.83, 0.68, 0.47, 0.14, 0.01, 0.0] }, omar: { src: 'media/voice-omar.mp3', dur: 3.0, peaks: [0.02, 0.09, 0.08, 0.94, 1.0, 0.34, 0.53, 0.62, 0.48, 0.52, 0.55, 0.58, 0.22, 0.66, 0.63, 0.55, 0.41, 0.7, 0.77, 0.66, 0.21, 0.13, 0.32, 0.41, 0.56, 0.44, 0.34, 0.25, 0.15, 0.14, 0.13, 0.04, 0.0, 0.0, 0.19, 0.28, 0.92, 0.8, 0.44, 0.03, 0.36, 0.67, 0.63, 0.6, 0.44, 0.26, 0.56, 0.34, 0.46, 0.54, 0.27, 0.21, 0.03, 0.05, 0.03, 0.01] }, dispatch: { src: 'media/voice-dispatch.mp3', dur: 4.9, peaks: [0.17, 0.13, 0.97, 0.98, 0.9, 0.63, 0.08, 0.0, 0.0, 0.98, 0.91, 0.95, 0.88, 0.89, 0.66, 0.07, 0.0, 0.0, 0.21, 0.88, 0.32, 0.49, 1.0, 0.98, 0.38, 0.95, 0.85, 0.51, 0.13, 0.0, 0.97, 0.95, 0.28, 0.85, 0.84, 0.94, 0.97, 0.8, 0.87, 0.95, 0.9, 0.72, 0.08, 0.0, 0.0, 0.0, 0.0, 0.0, 0.95, 0.96, 0.1, 0.84, 0.95, 0.93, 0.33, 0.28] } },
+    motion: { maya: { src: 'media/motion-maya.mp4', poster: 'media/motion-maya.jpg', dur: 2 }, omar: { src: 'media/motion-omar.mp4', poster: 'media/motion-omar.jpg', dur: 4 } },
+  };
+  // a location's fixed things, its surfaces and its own light (time of day and weather stay in the script)
+  const PLACE_EXTRA = {
+    bridge: {
+      elements: [{ id: 'posts', name: 'Lamp posts', note: 'One every thirty metres, on both sides', crop: [10, 50, 120, 68] }, { id: 'rails', name: 'Railings', note: 'Low steel, along both edges', crop: [0, 92, 140, 79] }, { id: 'cranes', name: 'Port cranes', note: 'Behind on the right, always in the same place', crop: [196, 24, 100, 56] }],
+      textures: [{ name: 'Asphalt', where: 'The road', kind: 'asphalt' }, { name: 'Lane paint', where: 'White lines, worn by the buses', kind: 'lanepaint' }, { name: 'Concrete', where: 'The barriers and the deck', kind: 'concrete' }],
+      lights: [{ name: 'Sodium lamps', kind: 'lamp', color: '#ffa94d', quality: 'Orange · hard pools · from above', note: 'Every thirty metres', at: [[40, 68], [100, 74], [220, 74], [280, 68]], r: 46 }, { name: 'Port floodlights', kind: 'flood', color: '#e6eeff', quality: 'White · far · behind the bridge', note: 'A haze from here', at: [[244, 34]], r: 70 }],
+    },
+    flat: {
+      elements: [{ id: 'window', name: 'Window', note: 'Left wall, onto the street', crop: [14, 22, 100, 56] }, { id: 'counter', name: 'Kitchen counter', note: 'Under the window', crop: [0, 78, 120, 68] }, { id: 'table', name: 'Table', note: 'In the middle, under the bulb', crop: [110, 70, 140, 79] }, { id: 'door', name: 'Front door', note: 'Right wall, opens inward', crop: [220, 34, 100, 56] }],
+      textures: [{ name: 'Plaster', where: 'The walls, stained near the ceiling', kind: 'plaster' }, { name: 'Linoleum', where: 'The floor, worn checks', kind: 'lino' }, { name: 'Formica', where: 'The table top, chipped at the edge', kind: 'formica' }],
+      lights: [{ name: 'Bare bulb', kind: 'bulb', color: '#ffc46b', quality: 'Warm · hard · straight down on the table', note: 'One bulb, no shade', at: [[176, 50]], r: 90 }, { name: 'Window spill', kind: 'window', color: '#b9ccff', quality: 'Cold · soft · from the left', note: 'The street outside', at: [[61, 61]], r: 70 }],
+    },
+    roof: {
+      elements: [{ id: 'tanks', name: 'Water tanks', note: 'Two, on legs, on the left', crop: [14, 40, 130, 73] }, { id: 'hut', name: 'Stairwell hut', note: 'In the middle; its door faces the street', crop: [104, 50, 130, 73] }, { id: 'ledge', name: 'Ledge', note: 'Knee-high, along the street side', crop: [190, 80, 130, 73] }, { id: 'sky', name: 'Skyline', note: 'Low blocks behind, never taller than the tanks', crop: [0, 50, 160, 90] }],
+      textures: [{ name: 'Roof concrete', where: 'The floor, with tar patches', kind: 'concrete' }, { name: 'Galvanised steel', where: 'The tanks, rust at the seams', kind: 'steel' }, { name: 'Painted door', where: 'The stairwell door, green going grey', kind: 'paint' }],
+      lights: [{ name: 'City glow', kind: 'glow', color: '#ff9a52', quality: 'Orange · soft · from below the ledge', note: 'The street lamps, never seen', at: [[290, 196]], r: 150 }, { name: 'Caged bulb', kind: 'bulb', color: '#dde6ff', quality: 'Cold · hard · over the stairwell door', note: 'The only light on the roof itself', at: [[161, 72]], r: 60 }],
+    },
+    alleys: {
+      elements: [{ id: 'fire', name: 'Fire escape', note: 'Down the left wall, three landings', crop: [0, 8, 150, 84], done: false }, { id: 'doorway', name: 'Doorway', note: 'Right wall, half way down', crop: [200, 50, 100, 56], done: false }],
+      textures: [{ name: 'Old stone', where: 'Both walls', kind: 'stone', done: false }, { name: 'Rusted iron', where: 'The fire escape', kind: 'iron', done: false }],
+      lights: [{ name: 'Wall lamp', kind: 'bulb', color: '#ffd27a', quality: 'Yellow · weak · one pool', note: 'Over the doorway', at: [[245, 56]], r: 60, done: false }],
+    },
+    fish: {
+      elements: [{ id: 'stalls', name: 'Stalls', note: 'Four in a row under awnings', crop: [0, 30, 260, 146], done: false }],
+      textures: [{ name: 'Awning canvas', where: 'Over the stalls', kind: 'canvas', done: false }],
+      lights: [{ name: 'Hanging bulbs', kind: 'bulb', color: '#ffd9a0', quality: 'Warm · soft · over each stall', note: '', at: [[48, 60], [124, 60], [200, 60], [276, 60]], r: 40, done: false }],
+    },
+  };
+  S.refs.forEach((r) => { if (r.kind === 'location') Object.assign(r, { elements: [], textures: [], lights: [] }, PLACE_EXTRA[r.id] || {}); });
+  const KIND = { characters: 'character', props: 'prop', locations: 'location' };
+  const PLURAL = { character: 'characters', prop: 'props', location: 'locations' };
+  const NOUN = { character: 'character', prop: 'prop', location: 'location' };
+  const ref = (id) => S.refs.find((r) => r.id === id);
+  const vOf = (r, vid) => r.variants.find((v) => v.id === (vid || S.variant[r.id] || 'default')) || r.variants[0];
+  const base = (r) => r.variants[0];
+  const status = (r, v = base(r)) => (r.notUsed ? 'notused' : v.status);
+  const ST = { draft: ['Draft', 's-draft'], awaiting: ['Awaiting generation', 's-await'], generating: ['Generating', 's-gen'], review: ['Review', 's-review'], approved: ['Approved', 's-ok'], stale: ['Stale', 's-stale'], notused: ['Not used', 's-off'] };
+  const st = (k) => `<span class="st ${ST[k][1]}"><i></i>${ST[k][0]}</span>`;
+  const FIRST = { character: 'front', prop: 'front', location: 'layout' };
+  const SLOTNAME = { front: 'Front', side: 'Side', back: 'Back', top: 'Top', scale: 'Scale', layout: 'Layout view' };
+
+  // ------------------------------------------------------------ art: quiet placeholders drawn in code (the real thing is OpenAI's images)
+  const svg = (vb, body) => `<svg class="art" viewBox="${vb}" preserveAspectRatio="xMidYMid slice" aria-hidden="true">${body}</svg>`;
+  const HAIR = {
+    short: { f: 'M37 74C33 26 87 26 83 74C80 58 72 54 60 54C48 54 40 58 37 74Z', b: 'M37 82C31 24 89 24 83 82C76 72 44 72 37 82Z' },
+    bun: { f: 'M37 74C33 26 87 26 83 74C80 58 72 54 60 54C48 54 40 58 37 74Z', b: 'M37 82C31 24 89 24 83 82C76 72 44 72 37 82Z', x: '<circle class="h" cx="60" cy="36" r="9"/>' },
+    swept: { f: 'M37 76C31 24 89 24 83 72C80 56 70 52 62 53C52 54 44 60 37 76Z', b: 'M37 82C31 24 89 24 83 82C76 72 44 72 37 82Z' },
+    long: { f: 'M35 78C30 24 90 24 85 78L88 112C80 104 80 86 80 74C77 60 43 60 40 74C40 86 40 104 32 112Z', b: 'M35 80C30 24 90 24 85 80L89 114H31Z' },
+  };
+  const hairOf = (r, opt) => r.looks[opt ?? (base(r).sheet.front?.opt ?? 0)] || 'short';
+  const greyHair = (r) => r.id === 'omar';
+  function portrait(r, slot, opt, v) {
+    // only a first Default front explores looks; everything after keeps the picked front's look
+    const explore = slot === 'front' && (!v || v.id === 'default');
+    const hk = hairOf(r, explore ? opt : undefined), H = HAIR[hk], hc = greyHair(r) ? 'h2' : 'h';
+    const bg = `<rect class="bg${opt % 4 || ''}" width="120" height="160"/>`;
+    const cut = v && v.id === 'cut' ? '<rect class="plaster" x="64" y="78" width="10" height="5" rx="1.5" transform="rotate(-18 69 80)"/>' : '';
+    const scar = r.id === 'maya' ? '<path class="ln2" d="M51 63l3 5"/>' : '';
+    const collar = '<path class="ln" style="stroke:#f1efe9;opacity:.6" d="M50 113L60 128L70 113"/>';
+    if (slot === 'side') {
+      return svg('0 0 120 160', `${bg}<path class="fg" d="M30 160C32 124 44 112 60 112C76 112 88 124 90 160Z"/><path class="sk" d="M54 92h14v22H54z"/><ellipse class="sk" cx="62" cy="72" rx="20" ry="25"/><path class="sk" d="M80 68l7 10-7 2z"/><path class="ln" d="M73 71h4M76 88h-6"/><ellipse class="ln" cx="58" cy="74" rx="3" ry="5"/><path class="${hc}" transform="translate(2 0)" d="${H.f}"/>${H.x ? H.x.replace('cx="60"', 'cx="56"') : ''}`);
+    }
+    if (slot === 'back') {
+      return svg('0 0 120 160', `${bg}<path class="fg" d="M16 160C20 124 38 112 60 112C82 112 100 124 104 160Z"/><path class="sk" d="M52 90h16v24H52z"/><ellipse class="sk" cx="60" cy="72" rx="21" ry="25"/><path class="${hc}" d="${H.b}"/>${(H.x || '').replace('class="h"', `class="${hc}"`)}`);
+    }
+    return svg('0 0 120 160', `${bg}<path class="fg" d="M16 160C20 124 38 112 60 112C82 112 100 124 104 160Z"/>${collar}<path class="sk" d="M52 90h16v24H52z"/><ellipse class="sk" cx="60" cy="72" rx="21" ry="25"/><path class="ln" d="M50 72h5M65 72h5M60 75v7l-2 1M54 88h12"/>${scar}${cut}<path class="${hc}" d="${H.f}"/>${(H.x || '').replace('class="h"', `class="${hc}"`)}`);
+  }
+  const FACES = {
+    neutral: { b: 'M33 38h11M56 38h11', m: 'M42 66h16' },
+    happy: { b: 'M33 36q5.5-3 11 0M56 36q5.5-3 11 0', m: 'M40 62q10 10 20 0' },
+    angry: { b: 'M33 35l11 5M67 35l-11 5', m: 'M42 68q8-5 16 0' },
+    sad: { b: 'M33 40l11-4M67 40l-11-4', m: 'M42 69q8-6 16 0' },
+    scared: { b: 'M33 35q5.5-4 11-1M56 34q5.5-3 11 1', o: '<ellipse class="ln" cx="50" cy="67" rx="5" ry="3.5"/>', big: true },
+    surprised: { b: 'M33 31q5.5-4 11 0M56 31q5.5-4 11 0', o: '<circle class="ln" cx="50" cy="67" r="4.5"/>', big: true },
+    smirk: { b: 'M33 38h11M56 35q5.5-3 11 0', m: 'M42 66q9 2 17-5' },
+  };
+  const FHAIR = { short: 'M22 52C20 8 80 8 78 52C74 34 64 28 50 28C36 28 26 34 22 52Z', bun: 'M22 52C20 8 80 8 78 52C74 34 64 28 50 28C36 28 26 34 22 52Z', swept: 'M22 54C18 6 82 6 78 50C74 32 62 28 54 29C42 30 30 36 22 54Z', long: 'M20 58C16 6 84 6 80 58L83 94C75 86 76 70 76 56C71 36 29 36 24 56C24 70 25 86 17 94Z' };
+  function face(r, ex, v) {
+    const f = FACES[ex] || FACES.neutral, hk = hairOf(r), hc = greyHair(r) ? 'h2' : 'h';
+    const eyes = f.big ? '<circle class="dk" cx="39" cy="47" r="2.6"/><circle class="dk" cx="61" cy="47" r="2.6"/>' : '<circle class="dk" cx="39" cy="47" r="1.7"/><circle class="dk" cx="61" cy="47" r="1.7"/>';
+    const cut = v && v.id === 'cut' ? '<rect class="plaster" x="58" y="56" width="10" height="5" rx="1.5" transform="rotate(-18 63 58)"/>' : '';
+    return svg('0 0 100 100', `<rect class="bg" width="100" height="100"/><path class="fg" d="M12 100C16 84 32 78 50 78C68 78 84 84 88 100Z"/><circle class="sk" cx="50" cy="50" r="27"/><path class="${hc}" d="${FHAIR[hk]}"/>${hk === 'bun' ? `<circle class="${hc}" cx="50" cy="11" r="8"/>` : ''}<path class="ln" d="${f.b}"/>${eyes}${f.m ? `<path class="ln" d="${f.m}"/>` : f.o}${cut}`);
+  }
+  function figure(r, o) {
+    const hc = greyHair(r) ? 'h2' : 'h', tone = o.tone || 'fg';
+    return svg('0 0 120 160', `<rect class="bg" width="120" height="160"/><path class="pants" d="M45 92h14l-1 58H47zM61 92h14l-2 58H62z"/><path class="${tone}" d="M44 40h32l6 54H38z"/><path class="${tone}" d="M44 42l-10 42 6 2 10-36M76 42l10 42-6 2-10-36"/>${o.strip ? '<path class="strip" d="M39 70h42"/>' : ''}<circle class="sk" cx="60" cy="26" r="11"/><path class="${hc}" d="M49 25C48 12 72 12 71 25C69 19 51 19 49 25Z"/>`);
+  }
+  function propArt(r, slot, opt, state) {
+    const bgc = `bg${opt % 4 || ''}`;
+    const P = {
+      envelope: {
+        front: state === 'open' ? '<path class="pp" d="M18 36L60 8L102 36Z"/><rect class="pp" x="18" y="36" width="84" height="54" rx="2"/><path class="ln" d="M18 36l42 26 42-26" style="stroke:#8f7650"/><path class="ln" d="M40 60h40M40 68h28" style="stroke:#5b6ea8"/>' : '<rect class="pp" x="18" y="34" width="84" height="54" rx="2"/><path class="ln" d="M18 36l42 30 42-30" style="stroke:#8f7650"/><circle class="wax" cx="60" cy="64" r="6"/>',
+        side: '<rect class="pp" x="57" y="34" width="6" height="54" rx="1"/>',
+        back: '<rect class="pp" x="18" y="34" width="84" height="54" rx="2"/><path class="ln" d="M40 56h40M40 64h28" style="stroke:#5b6ea8"/>',
+        top: '<rect class="pp" x="18" y="58" width="84" height="6" rx="1"/>',
+      },
+      satchel: {
+        front: '<path class="ln" style="stroke:#6c6856;stroke-width:4" d="M32 52C32 14 88 14 88 52"/><rect class="cv" x="24" y="48" width="72" height="50" rx="8"/><path class="cv2" d="M24 56c0-4 2-8 8-8h56c6 0 8 4 8 8v16c-20 8-52 8-72 0z"/><rect class="m2" x="56" y="70" width="8" height="8" rx="1"/><g transform="rotate(34 84 28)"><rect class="tape" x="72" y="24" width="26" height="8" rx="1"/><text class="tt" x="74" y="30">NEVER OPEN</text></g>',
+        side: '<path class="ln" style="stroke:#6c6856;stroke-width:4" d="M60 50V16"/><rect class="cv" x="48" y="48" width="24" height="50" rx="6"/>',
+        back: '<path class="ln" style="stroke:#6c6856;stroke-width:4" d="M32 52C32 14 88 14 88 52"/><rect class="cv" x="24" y="48" width="72" height="50" rx="8"/>',
+        top: '<rect class="cv" x="24" y="50" width="72" height="22" rx="8"/><path class="ln" style="stroke:#6c6856;stroke-width:4" d="M30 61h60"/>',
+      },
+      bike: {
+        front: '<circle class="ln" cx="32" cy="80" r="20"/><circle class="ln" cx="88" cy="80" r="20"/><path class="ln" style="stroke-width:2.4" d="M32 80L50 54H80L88 80M50 54L60 80H32M60 80L80 54M77 46h11M50 54l-3-8h-7"/>',
+        side: '<ellipse class="ln" cx="60" cy="80" rx="4" ry="20"/><path class="ln" style="stroke-width:2.4" d="M60 60V40M48 40h24"/>',
+        back: '<ellipse class="ln" cx="60" cy="80" rx="4" ry="20"/><path class="ln" style="stroke-width:2.4" d="M60 60V48M54 46h12"/>',
+        top: '<path class="ln" style="stroke-width:3" d="M12 60h96M78 52v16"/>',
+      },
+    }[r.id] || {};
+    if (slot === 'scale') {
+      const obj = { envelope: '<g transform="translate(66 62) scale(.22)"><rect class="pp" x="18" y="34" width="84" height="54" rx="2"/></g>', satchel: '<g transform="translate(60 56) scale(.34)"><rect class="cv" x="24" y="48" width="72" height="50" rx="8"/></g>', bike: '<g transform="translate(52 52) scale(.6)"><circle class="ln" cx="32" cy="80" r="20"/><circle class="ln" cx="88" cy="80" r="20"/><path class="ln" style="stroke-width:2.4" d="M32 80L50 54H80L88 80M50 54L60 80H32M60 80L80 54"/></g>' }[r.id] || '';
+      return svg('0 0 120 120', `<rect class="${bgc}" width="120" height="120"/><path class="hint" d="M8 112h104"/><circle class="m" cx="34" cy="20" r="8"/><path class="m" d="M26 30h16l3 40h-5l-2 42h-6l-1-30-1 30h-6l-2-42h-5z"/>${obj}`);
+    }
+    const tweak = opt % 2 ? ' transform="translate(60 60) scale(.9) translate(-60 -60)"' : '';
+    return svg('0 0 120 120', `<rect class="${bgc}" width="120" height="120"/><g${tweak}>${P[slot] || P.front || ''}</g>`);
+  }
+  const PLACES = {
+    roof: '<rect class="bg" width="320" height="180"/><path class="far" d="M0 112h22V86h18v14h16V66h22v46h14V92h20v20h18V72h24v40h16V96h22v16h20V84h26v28h24V94h24v18h14v8H0z"/><path class="fl" d="M0 120L320 110V180H0Z"/><path class="m2" d="M196 116L320 108v9L196 124Z"/><rect class="m" x="34" y="56" width="44" height="46" rx="3"/><ellipse class="m2" cx="56" cy="56" rx="22" ry="5"/><path class="ln" d="M40 102v20M72 102v20"/><rect class="m" x="88" y="72" width="28" height="32" rx="2"/><path class="ln" d="M92 104v16M112 104v16"/><rect class="m" x="138" y="62" width="48" height="56"/><rect class="dk" x="152" y="78" width="18" height="40"/>',
+    flat: '<rect class="wall" width="320" height="130"/><path class="fl" d="M0 130H320V180H0Z"/><rect class="win" x="26" y="30" width="70" height="62"/><path class="ln" d="M61 30v62M26 61h70"/><rect class="m" x="0" y="100" width="100" height="30"/><path class="ln" d="M176 0v42"/><circle class="lamp" cx="176" cy="48" r="7"/><rect class="m2" x="122" y="104" width="112" height="8" rx="2"/><path class="ln" d="M132 112v34M224 112v34"/><rect class="dk" x="262" y="40" width="40" height="90"/><circle class="lamp" cx="270" cy="88" r="2"/>',
+    bridge: '<rect class="bg" width="320" height="180"/><path class="ln" d="M244 30v62M226 34h44M244 34l-14 12M70 40v52M56 44h40M70 44l-10 9" style="opacity:.35"/><path class="fl" d="M0 180L130 98H190L320 180Z"/><path class="ln" d="M160 100v10M160 122v14M160 150v22" style="stroke:#f1efe9;stroke-width:2"/><path class="ln" d="M0 118L130 94M320 118L190 94"/><path class="ln" d="M40 112V70M100 99V76M220 99V76M280 112V70"/><circle class="lamp" cx="40" cy="68" r="5"/><circle class="lamp" cx="100" cy="74" r="4"/><circle class="lamp" cx="220" cy="74" r="4"/><circle class="lamp" cx="280" cy="68" r="5"/><rect class="m" x="190" y="112" width="58" height="34" rx="4"/><rect class="dk" x="196" y="118" width="46" height="10" rx="1"/>',
+    alleys: '<rect class="bg" width="320" height="180"/><path class="wall" d="M0 0H110L140 120V180H0Z"/><path class="wall2" d="M320 0H210L180 120V180H320Z"/><path class="fl" d="M140 120H180L320 180H0Z"/><path class="ln" d="M18 30h60M18 70h66M18 110h72M24 30l50 40M24 70l56 40M18 30v80M78 30l6 80"/><rect class="dk" x="230" y="66" width="30" height="64"/>',
+    fish: '<rect class="bg" width="320" height="180"/><path class="fl" d="M0 120H320V180H0Z"/>' + [0, 1, 2, 3].map((i) => `<g transform="translate(${16 + i * 76} 0)"><path class="aw" d="M0 60h64v14q-8 8-16 0q-8 8-16 0q-8 8-16 0q-8 8-16 0z"/><rect class="aw2" x="6" y="96" width="52" height="24"/><path class="ln" d="M6 74v46M58 74v46"/></g>`).join(''),
+  };
+  function placeArt(r, slot, opt) {
+    const mirror = opt % 2 === 1, low = opt >= 2;
+    let vb = '0 0 320 180';
+    if (slot.includes(':')) {
+      const [k, id] = slot.split(':');
+      const a = (k === 'area' ? r.areas : r.elements || []).find((x) => x.id === id);
+      if (a) { let [x, y, w, h] = a.crop; if (mirror) x = 320 - x - w; vb = `${x} ${y} ${w} ${h}`; }
+    }
+    const t = `${mirror ? 'translate(320 0) scale(-1 1)' : ''}${low ? ' translate(0 6)' : ''}`;
+    return svg(vb, `<rect class="bg" width="320" height="180"/><g transform="${t}">${PLACES[r.place] || ''}</g>`);
+  }
+  function art(r, slot, opt = 0, v = null) {
+    if (r.kind === 'character') {
+      if (slot.startsWith('expr:')) return face(r, slot.slice(5), v);
+      if (slot.startsWith('outfit:')) return figure(r, r.outfits.find((o) => o.id === slot.slice(7)) || {});
+      return portrait(r, slot, opt, v);
+    }
+    if (r.kind === 'prop') return slot.startsWith('state:') ? propArt(r, 'front', base(r).sheet.front?.opt ?? 0, slot.slice(6)) : propArt(r, slot, opt);
+    return placeArt(r, slot, slot.includes(':') ? (base(r).sheet.layout?.opt ?? 0) : opt);
+  }
+  const thumb = (r) => {
+    const v = base(r), first = FIRST[r.kind], s = v.sheet[first];
+    if (r.voiceOnly) return `<div class="ph">${ic('wave')}</div><span class="vo tag">voice only</span>`;
+    if (s && s.opt !== undefined) return art(r, first, s.opt, v);
+    if (s === 'working') return '<div class="ph"><span class="small">Generating…</span></div>';
+    return `<div class="ph">${ic(r.kind === 'character' ? 'user' : r.kind === 'prop' ? 'key' : 'pin')}</div>`;
+  };
+
+  // ------------------------------------------------------------ routes: #/<tab>[/<kind>[/<ref>[/<room tab>]]]
+  // the page keeps its own place (a shared page can't lean on the address bar); every in-page link goes through go()
+  let here = (location.hash || '').replace(/^#\/?/, '');
+  const TABS_OK = ['references', 'production', 'brainstorm', 'script'];
+  const route = () => { const [tab = 'references', a = 'characters', b = '', c = ''] = here.split('/').filter(Boolean); return TABS_OK.includes(tab) ? { tab, a, b, c } : { tab: 'references', a: 'characters', b: '', c: '' }; };
+  function go(h) { here = String(h).replace(/^#\/?/, ''); try { history.replaceState(null, '', `#/${here}`); } catch {} S.menu = null; S.gen = null; S.adding = null; render(true); }
+  document.addEventListener('click', (e) => { const a = e.target.closest('a[href^="#"]'); if (!a) return; e.preventDefault(); go(a.getAttribute('href')); });
+
+  // ------------------------------------------------------------ the header
+  const menu = (id, items, cls = '') => (S.menu === id ? `<div class="menu ${cls}">${items.join('')}</div>` : '');
+  const mi = (act, icon, label, data = {}, cls = '', sub = '') => `<button class="mi ${cls}" data-act="${act}" ${Object.entries(data).map(([k, v]) => `data-${k}="${esc(v)}"`).join(' ')}>${icon ? ic(icon, 's') : ''}${label}${sub ? `<span class="msub">${sub}</span>` : ''}</button>`;
+  const menuBtn = (id, icon = 'more', cls = '') => `<button class="icon ${cls} ${S.menu === id ? 'on' : ''}" data-act="menu" data-menu="${id}" title="more">${ic(icon)}</button>`;
+  const progress = () => {
+    const done = S.refs.filter((r) => !r.notUsed);
+    return { brainstorm: 1, references: done.filter((r) => base(r).status === 'approved').length / done.length, script: 0.75, production: 0 };
+  };
+  function header(r) {
+    const TABS = [['brainstorm', 'Brainstorm', 'spark'], ['references', 'References', 'refs'], ['script', 'Script', 'script'], ['production', 'Production', 'film']];
+    const counts = { character: 0, prop: 0, location: 0 };
+    S.refs.forEach((x) => counts[x.kind]++);
+    let sub = '';
+    if (r.tab === 'references') {
+      const kind = KIND[r.a] || 'character';
+      sub = `<div class="sl"></div><nav class="segs">${[['characters', 'Characters', 'character'], ['props', 'Props', 'prop'], ['locations', 'Locations', 'location']].map(([k, n, kk]) => `<a class="seg ${r.a === k ? 'on' : ''}" href="#/references/${k}">${n} <span class="n">${counts[kk]}</span></a>`).join('')}</nav>
+        <div class="sr"></div>`;
+    } else if (r.tab === 'brainstorm') {
+      sub = `<div class="sl"></div><nav class="segs"><span class="seg on">Sessions</span><span class="seg">Promoted <span class="badge">2</span></span><span class="seg">History</span></nav><div class="sr"></div>`;
+    } else if (r.tab === 'script') {
+      sub = `<div class="sl"><button class="varpill small">Main ${ic('chevron', 's chev')}</button></div><nav class="segs"><span class="seg">Home</span><span class="seg on">Write</span><span class="seg">Board</span><span class="seg">Shots</span></nav><div class="sr"><button class="icon" title="The Bible">${ic('book')}</button><button class="icon" title="History">${ic('history')}</button></div>`;
+    } else {
+      const snd = r.a === 'sound';
+      sub = `<div class="sl"></div><nav class="segs"><a class="seg ${snd ? '' : 'on'}" href="#/production">Frames</a><span class="seg dim">Video</span><a class="seg ${snd ? 'on' : ''}" href="#/production/sound">Sound</a><span class="seg dim">Cut</span></nav><div class="sr"></div>`;
+    }
+    const projects = [['Rainline', true], ['Any Film', false], ['test', false]];
+    return `<div class="head"><header class="top">
+        <div class="tl"><a class="logo" href="#/references/characters" title="all projects">π</a>
+          <div class="menuwrap"><button class="pill ${S.menu === 'proj' ? 'on' : ''}" data-act="menu" data-menu="proj">${pie(progress())}<span class="pn">Rainline</span>${ic('chevron', 'chev')}</button>
+          ${menu('proj', [mi('toast', 'grid', 'Overview', { t: 'Overview: the project page as it is now, opened from here.' }), '<div class="msep"></div>', '<div class="mlabel">Projects</div>', ...projects.map(([n, here]) => mi(here ? 'noop' : 'toast', '', `${pie(here ? progress() : { brainstorm: 0.5 }, here ? '#1b36a8' : '#0b6b78', 18)}<span>${n}</span>`, { t: `Would open ${n} in this same tab.` }, here ? 'cur' : '', here ? 'here' : '')), mi('toast', 'grid', 'All projects', { t: 'All projects: the home page.' })])}</div></div>
+        <nav class="tabs">${TABS.map(([k, n, icn]) => `<a class="tab ${r.tab === k ? 'on' : ''}" href="#/${k}${k === 'references' ? '/characters' : ''}">${ic(icn)}<span class="tl2">${n}</span></a>`).join('')}</nav>
+        <div class="tr"><span class="people"><span class="av ${S.me === 'Hadi' ? 'me' : ''}" title="Hadi">H</span><span class="av ${S.me === 'Abdallah' ? 'me' : ''}" title="Abdallah">A</span></span>
+          <div class="menuwrap">${menuBtn('more')}${menu('more', [mi('as', 'user', `You are <b>${S.me}</b> · be ${S.me === 'Hadi' ? 'Abdallah' : 'Hadi'}`)], 'right')}</div></div>
+      </header><div class="sub">${sub}</div></div>`;
+  }
+
+  // ------------------------------------------------------------ References: the gallery
+  function attention(kind) {
+    const items = [];
+    S.refs.forEach((r) => {
+      if (r.owner !== S.me || r.kind !== kind) return;
+      r.variants.forEach((v, i) => {
+        const where = `#/references/${PLURAL[r.kind]}/${r.id}`;
+        if (v.status === 'awaiting') items.push([where, `${r.name} · ${v.name}`, `${v.range}, waiting to be generated`, r.id, v.id]);
+        else if (v.status === 'review') items.push([where, i ? `${r.name} · ${v.name}` : r.name, 'yours to approve', r.id, v.id]);
+        else if (v.status === 'draft' && !r.notUsed && !r.voiceOnly && i === 0) items.push([where, r.name, 'no images yet', r.id, v.id]);
+      });
+      if (r.notUsed) items.push([`#/references/${PLURAL[r.kind]}/${r.id}`, r.name, 'not in any placed scene', r.id, 'default']);
+    });
+    if (!items.length) return '';
+    const head = `<button class="attn" data-act="attn">${'<span class="dot"></span>'}<b>${plural(items.length, 'thing')} for you</b><span>· ${esc(items[0][1])}: ${esc(items[0][2])}${items.length > 1 ? ` · and ${items.length - 1} more` : ''}</span>${ic('chevron', 'chev')}</button>`;
+    return head + (S.attnOpen ? `<div class="attnlist">${items.map(([h, n, why, rid, vid]) => `<a href="${h}" data-act="go-var" data-ref="${rid}" data-v="${vid}">${thumbMini(ref(rid))}<b>${esc(n)}</b><span class="why">${esc(why)}</span></a>`).join('')}</div>` : '');
+  }
+  const thumbMini = (r) => `<span class="rchip" style="padding:0;border:0;background:none"><span class="th ${r.kind === 'character' ? '' : 'sq'}">${r.voiceOnly ? '' : base(r).sheet[FIRST[r.kind]]?.opt !== undefined ? art(r, FIRST[r.kind], base(r).sheet[FIRST[r.kind]].opt, base(r)) : ''}</span></span>`;
+  function gallery(r) {
+    const kind = KIND[r.a] || 'character';
+    const list = S.refs.filter((x) => x.kind === kind);
+    const cards = list.map((x) => {
+      const v = base(x), mid = `card:${x.id}`;
+      const extra = x.variants.length > 1 ? `<span class="tag">+${x.variants.length - 1} variant</span>` : x.kind === 'location' && x.areas.length ? `<span class="tag">${plural(x.areas.length, 'area')}</span>` : '';
+      return `<div class="rc ${x.notUsed ? 'off' : ''}" data-act="open-ref" data-href="#/references/${PLURAL[x.kind]}/${x.id}">
+        <div class="frame">${thumb(x)}</div>
+        <div class="meta"><span class="nm">${esc(x.name)}</span><span class="ln">${esc(x.line)}</span><span class="row">${st(status(x))}<span class="grow"></span>${extra}${x.ai.length || x.voiceAi ? '<span class="tag ai">AI-suggested</span>' : ''}</span></div>
+        <div class="cmenu menuwrap ${S.menu === mid ? 'open' : ''}">${menuBtn(mid)}</div>
+        <div class="menuwrap cardmw">${menu(mid, [mi('toast', 'copy', 'Copy to a project…', { t: 'Copies the card and its images into the other project. The two then change on their own.' }), mi('toast', 'user', `Owner: ${x.owner}`, { t: 'The owner can change any time. No roles.' }), '<div class="msep"></div>', mi('toast', 'trash', 'Delete', { t: 'Delete: not in the demo.' }, 'danger')])}</div>
+      </div>`;
+    });
+    const nf = S.newForm === kind
+      ? `<form class="rc newform" data-form="new"><div class="small muted">A new ${NOUN[kind]}</div><input id="new-name" data-newname placeholder="${kind === 'character' ? 'Name' : kind === 'prop' ? 'What is it?' : 'The place'}" maxlength="60" autocomplete="off"><div class="acts"><button class="primary small">Create</button><button type="button" class="ghost small" data-act="new-x">Cancel</button></div></form>`
+      : `<button class="rc new" data-act="new-open"><span class="plus">${ic('plus', 'l')}</span><span>New ${NOUN[kind]}</span></button>`;
+    return `<main class="page">${attention(kind)}<div class="rgrid ${kind === 'location' ? 'wide' : kind === 'prop' ? 'props' : ''}">${cards.join('')}${nf}</div></main>`;
+  }
+
+  // ------------------------------------------------------------ References: one card's room
+  function slotHtml(r, v, slot, cls = '', label = SLOTNAME[slot]) {
+    const s = v.sheet[slot], first = FIRST[r.kind], hasFirst = v.sheet[first] && v.sheet[first].opt !== undefined;
+    const lab = label ? `<span class="slab">${esc(label)}</span>` : '';
+    if (s === 'working') return `<div class="slot working ${cls}">${lab}<div class="in">${slot === first ? 'Making 4 options…' : `From the ${first === 'layout' ? 'layout' : 'front'}…`}</div></div>`;
+    if (s && s.opt !== undefined) return `<div class="slot ${cls}">${art(r, slot, s.opt, v)}${lab}<div class="sacts"><button data-act="gen" data-ref="${r.id}" data-slot="${slot}" data-fix="1">${ic('edit', 's')}Fix</button><button data-act="gen" data-ref="${r.id}" data-slot="${slot}">${ic('refresh', 's')}Redo</button></div></div>`;
+    if (slot === first) {
+      const from = v.id !== 'default' ? `from the Default ${first === 'layout' ? 'layout' : 'front'}` : first === 'layout' ? 'one wide view of the whole place' : '3–4 options to pick from';
+      return `<div class="slot empty ${cls}">${lab}<div class="in"><button class="small" data-act="gen" data-ref="${r.id}" data-slot="${slot}">${ic('sparkle', 's')}Generate</button><span>${from}</span></div></div>`;
+    }
+    return `<div class="slot empty ${cls}">${lab}<div class="in">${hasFirst ? `<button class="small ghost" data-act="gen" data-ref="${r.id}" data-slot="${slot}">${ic('sparkle', 's')}Generate</button>` : `<span>made from the ${first === 'layout' ? 'layout' : 'front'}</span>`}</div></div>`;
+  }
+  const fieldsHtml = (r, list, aiKeys, key = 'fields') => `<div class="flds">${list.map(([k, l, val]) => `<div class="fld"><div class="lb">${esc(l)}${aiKeys.includes(k) ? '<span class="tag ai" data-aitag>AI-suggested</span>' : ''}</div><div class="val" contenteditable="true" spellcheck="false" data-ref="${r.id}" data-field="${esc(k)}" data-list="${key}" data-ph="—">${esc(val)}</div></div>`).join('')}</div>`;
+  function dirtyLine(r) {
+    const v = base(r), n = v.usedIn.length;
+    return `<div class="dirty ${S.dirty[r.id] ? 'on' : ''}" data-dirty="${r.id}">${ic('alert', 's')}<span><b>${esc(r.name)}</b> is approved. Saving makes v${v.version + 1} and marks ${plural(n, 'shot')} Stale.</span><span class="grow"></span><button class="small primary" data-act="save-version" data-ref="${r.id}">Save as v${v.version + 1}</button><button class="small ghost" data-act="undo-edit" data-ref="${r.id}">Undo</button></div>`;
+  }
+  function usedLine(r, v) {
+    const shots = v.usedIn.length ? v.usedIn.map((n) => `<a class="sn" href="#/production" title="shot ${n}">${n}</a>`).join('') : '<span class="faint">no shots yet</span>';
+    return `<div class="usedin"><span>Used in</span>${shots}<button class="vlink" data-act="toast" data-t="Versions open in their own room: v1, v2… each with who changed what and which shots were made with it.">${v.version ? `v${v.version} · ` : ''}Versions ${ic('history', 's')}</button></div>`;
+  }
+  function roomHead(r, v, kindLabel) {
+    const varMenu = `vmenu:${r.id}`, oMenu = `omenu:${r.id}`, rMenu = `rmenu:${r.id}`;
+    const vs = status(r, v);
+    const approve = vs === 'review' ? (r.owner === S.me ? `<button class="small primary" data-act="approve" data-ref="${r.id}">${ic('check', 's')}Approve</button>` : `<span class="waits">${esc(r.owner)} approves this one</span>`) : '';
+    const variants = r.kind !== 'location' && !r.voiceOnly ? `<div class="menuwrap"><button class="varpill ${v.id !== 'default' ? 'alt' : ''}" data-act="menu" data-menu="${varMenu}">${esc(v.name)}${v.range ? ` <span class="${v.id !== 'default' ? '' : 'faint'}">· ${esc(v.range)}</span>` : ''} ${ic('chevron', 'chev')}</button>
+        ${menu(varMenu, ['<div class="mlabel">Lasting changes</div>', ...r.variants.map((x) => mi('variant', '', `${esc(x.name)}`, { ref: r.id, v: x.id }, x.id === v.id ? 'cur' : '', `${esc(x.range || '')} · ${ST[status(r, x)][0]}`)), '<div class="msep"></div>', mi('toast', 'plus', 'Add a lasting change…', { t: 'By hand: a haircut, aged 10 years, the burned café. Wet, crying or muddy stay in the script.' })])}</div>` : '';
+    return `<a class="backl" href="#/references/${PLURAL[r.kind]}">${ic('back', 's')}${kindLabel}</a>
+      <div class="rhead"><h1>${esc(r.name)}</h1>${st(vs)}${variants}<span class="grow"></span>${approve}
+        <div class="menuwrap"><button class="owner" data-act="menu" data-menu="${oMenu}"><span class="mini ${r.owner === S.me ? 'me' : ''}">${r.owner[0]}</span>${esc(r.owner)} · owner</button>${menu(oMenu, ['<div class="mlabel">Who approves it</div>', ...['Hadi', 'Abdallah'].map((n) => mi('owner', '', n, { ref: r.id, n }, r.owner === n ? 'cur' : ''))], 'right')}</div>
+        <div class="menuwrap">${menuBtn(rMenu)}${menu(rMenu, [mi('toast', 'history', 'Versions', { t: 'Versions: their own room.' }), mi('toast', 'copy', 'Copy to another project…', { t: 'Copies the card and its images. The two then change on their own.' }), '<div class="msep"></div>', mi('toast', 'trash', 'Delete', { t: 'Delete: not in the demo.' }, 'danger')], 'right')}</div>
+        <div class="rsub">${esc(r.line)}</div></div>`;
+  }
+  const roomTabs = (r, tabs, cur) => `<nav class="segs inroom">${tabs.map(([k, n, c]) => `<a class="seg ${cur === k ? 'on' : ''}" href="#/references/${PLURAL[r.kind]}/${r.id}${k === tabs[0][0] ? '' : `/${k}`}">${n}${c !== undefined ? ` <span class="n">${c}</span>` : ''}</a>`).join('')}</nav>`;
+
+  function characterRoom(r, sub) {
+    const v = vOf(r);
+    const tabs = r.voiceOnly ? [['look', 'Look'], ['voice', 'Voice']] : [['look', 'Look'], ['expressions', 'Expressions', r.expressions.length], ['outfits', 'Outfits', r.outfits.length], ['motion', 'Motion'], ['voice', 'Voice']];
+    const cur = tabs.some(([k]) => k === sub) ? sub : 'look';
+    let body = '';
+    if (cur === 'look') {
+      if (r.voiceOnly) {
+        body = `<div class="rbody"><div class="voiceonly">${ic('wave')}<div><b>Heard, never seen.</b><br>${esc(r.name)} is only a voice on the radio in sc. 1.</div><button class="small" data-act="give-face" data-ref="${r.id}">${ic('user', 's')}Give them a face</button></div><div><div class="srcline" style="margin-top:0">${ic('script', 's')}${esc(r.source)}</div><p class="muted small" style="margin-top:14px">The Voice tab is what matters for this one.</p></div></div>`;
+      } else {
+        const right = v.id === 'default'
+          ? `${fieldsHtml(r, r.fields, r.ai)}${dirtyLine(r)}<div class="srcline">${ic('script', 's')}${esc(r.source)}</div>`
+          : `<div class="flds"><div class="fld"><div class="lb">What changes</div><div class="val" contenteditable="true" spellcheck="false">${esc(v.delta)}</div></div><div class="fld"><div class="lb">Everything else</div><div class="muted">As Default (v${base(r).version})</div></div><div class="fld"><div class="lb">Starts at</div><div>${esc(v.range.replace(/^from /, ''))}, and stays. Shots from there on use it, unless a shot says otherwise.</div></div></div><div class="srcline">${ic('sparkle', 's')}${esc(v.auto)}</div>`;
+        body = `<div class="rbody"><div class="sheet">${slotHtml(r, v, 'front', 'big')}${slotHtml(r, v, 'side')}${slotHtml(r, v, 'back')}</div><div>${right}</div></div>`;
+      }
+    } else if (cur === 'expressions') {
+      const done = v.id === 'default' ? r.exprDone : v.exprDone;
+      const exprWorking = v.exprWorking;
+      body = `<div class="tiles">${r.expressions.map(([ex, by]) => `<div class="tile"><div class="slot ${exprWorking ? 'working' : done ? '' : 'empty'}">${exprWorking ? '<div class="in">…</div>' : done ? art(r, `expr:${ex}`, 0, v) + `<div class="sacts"><button data-act="toast" data-t="Redo makes 3–4 options for this expression, from the front.">${ic('refresh', 's')}Redo</button></div>` : `<div class="in"><span>made from the front</span></div>`}</div><div class="tn">${esc(ex[0].toUpperCase() + ex.slice(1))}${by ? `<span class="tag">added by ${esc(by)}</span>` : ''}</div></div>`).join('')}
+        <div class="tile add">${S.adding === 'expr' ? `<div class="slot" style="border-style:solid">${ic('plus', 'l')}</div><input id="add-input" data-add="expr" placeholder="exhausted, disgusted…" maxlength="30" autocomplete="off">` : `<div class="slot" data-act="add" data-what="expr">${ic('plus', 'l')}</div><div class="tn faint">Add an expression</div>`}</div></div>`;
+    } else if (cur === 'outfits') {
+      body = `<div class="tiles outfits">${r.outfits.map((o) => `<div class="tile"><div class="slot">${o.done ? art(r, `outfit:${o.id}`) : '<div class="in">…</div>'}<div class="sacts"><button data-act="toast" data-t="Fix by prompt: “the jacket is longer”.">${ic('edit', 's')}Fix</button></div></div><div class="tn">${esc(o.name)}${o.main ? '<span class="tag">main</span>' : ''}</div><div class="td">${esc(o.note)}</div></div>`).join('')}
+        <div class="tile add">${S.adding === 'outfit' ? `<div class="slot" style="border-style:solid">${ic('plus', 'l')}</div><input id="add-input" data-add="outfit" placeholder="work suit, pajamas, night out…" maxlength="40" autocomplete="off">` : `<div class="slot" data-act="add" data-what="outfit">${ic('plus', 'l')}</div><div class="tn faint">Add an outfit</div>`}</div></div>`;
+    } else if (cur === 'motion') {
+      const mm = MEDIA.motion[r.id], paused = S.clipPaused[r.id] ?? S.calm;
+      const clip = S.clipMaking === r.id ? `<div class="clip working"><span class="slab">Clip</span><div class="in">Making a new clip…</div></div>`
+        : mm ? `<div class="clip ${paused ? 'paused' : ''}"><video src="${mm.src}" poster="${mm.poster}" ${paused ? '' : 'autoplay'} muted loop playsinline data-clip="${r.id}"></video><span class="slab">Clip · ${mm.dur} s, loops</span><button class="cplay" data-act="clip" data-id="${r.id}" title="Play / pause">${ic(paused ? 'play' : 'pause', 'fill')}</button><div class="sacts"><button data-act="toast" data-t="Fix by prompt, like “slower at the lights”: 3–4 new clips to pick from.">${ic('edit', 's')}Fix</button><button data-act="clip-redo" data-id="${r.id}">${ic('refresh', 's')}Redo</button></div><div class="cbar"><i data-cbar="${r.id}"></i></div></div>`
+        : `<div class="clip empty"><span class="slab">Clip</span><div class="in"><button class="small" data-act="toast" data-t="In the app this makes 3–4 short clips from the front and the text, with the video model.">${ic('sparkle', 's')}Generate a clip</button><span>from the front and the text</span></div></div>`;
+      body = `<div class="rbody"><div>${clip}</div><div><div class="lb muted small" style="margin-bottom:8px">How ${esc(r.name)} moves</div><div class="val prose" contenteditable="true" spellcheck="false" data-motion="${r.id}" data-ph="Walk, posture, gestures, energy.">${esc(r.motion)}</div><div class="srcline">${ic('sparkle', 's')}The clip is made from the front and this text.</div><div class="dirty ${S.motionDirty[r.id] ? 'on' : ''}" data-mdirty="${r.id}">${ic('alert', 's')}<span>The clip was made from an older text.</span><span class="grow"></span><button class="small" data-act="clip-redo" data-id="${r.id}">Redo the clip</button></div></div></div>`;
+    } else {
+      const m = MEDIA.voice[r.id], line = (r.voice.find(([l]) => l === 'Sample line') || [])[1] || '';
+      const sample = `<div class="sample"><div class="lb muted small">Sample</div>${m ? player(r.id) + (line ? `<div class="sline">${esc(line)}</div>` : '') : '<div class="faint small">No sample yet.</div>'}
+        <div class="dirty ${S.voiceDirty[r.id] ? 'on' : ''}" data-vdirty="${r.id}">${ic('alert', 's')}<span>Made from an older description.</span></div>
+        <div class="smeta"><span>Made in Sound, from this description.</span><span class="grow"></span><a class="btn" href="#/production/sound/${r.id}">${ic('wave', 's')}Open in Sound</a></div></div>`;
+      body = `<div class="rbody"><div>${fieldsHtml(r, r.voice.map(([l, val], i) => [`v${i}`, l, val]), r.voiceAi ? r.voice.map((_, i) => `v${i}`) : [], 'voice')}</div><div>${sample}</div></div>`;
+    }
+    return `<main class="page">${roomHead(r, v, 'Characters')}${roomTabs(r, tabs, cur)}${body}${usedLine(r, v)}</main>`;
+  }
+  function propRoom(r, sub) {
+    const v = base(r);
+    const tabs = [['look', 'Object sheet'], ['scale', 'Scale'], ['states', 'States', r.states.length]];
+    const cur = tabs.some(([k]) => k === sub) ? sub : 'look';
+    let body;
+    if (cur === 'look') body = `<div class="rbody"><div class="sheet props">${slotHtml(r, v, 'front', 'big')}${slotHtml(r, v, 'side')}${slotHtml(r, v, 'back')}${slotHtml(r, v, 'top')}<div></div></div><div>${fieldsHtml(r, r.fields, r.ai)}${dirtyLine(r)}<div class="srcline">${ic('user', 's')}${esc(r.source)}</div></div></div>`;
+    else if (cur === 'scale') body = `<div class="rbody"><div style="max-width:420px">${slotHtml(r, v, 'scale', '', 'Next to a person')}</div><div><p class="muted small">So its size doesn’t change between shots. Made from the front once it’s picked.</p></div></div>`;
+    else body = `<div class="tiles">${r.states.map((s) => `<div class="tile"><div class="slot">${s.done && v.sheet.front?.opt !== undefined ? art(r, `state:${s.id}`) : '<div class="in"></div>'}</div><div class="tn">${esc(s.name)}${s.main ? '<span class="tag">default</span>' : ''}</div><div class="td">${esc(s.note || '')}</div></div>`).join('')}
+      <div class="tile add">${S.adding === 'state' ? `<div class="slot" style="border-style:solid">${ic('plus', 'l')}</div><input id="add-input" data-add="state" placeholder="new, broken, open, bloody…" maxlength="30" autocomplete="off">` : `<div class="slot" data-act="add" data-what="state">${ic('plus', 'l')}</div><div class="tn faint">Add a state</div>`}</div></div>`;
+    return `<main class="page">${roomHead(r, v, 'Props')}${roomTabs(r, tabs, cur)}${body}${usedLine(r, v)}</main>`;
+  }
+  function locationRoom(r, sub) {
+    const v = base(r);
+    const tabs = [['look', 'Layout'], ['elements', 'Elements', r.elements.length], ['texture', 'Texture', r.textures.length], ['light', 'Light', r.lights.length]];
+    const cur = tabs.some(([k]) => k === sub) ? sub : 'look';
+    const hasLayout = v.sheet.layout && v.sheet.layout.opt !== undefined;
+    const ready = (x) => hasLayout && x.done !== false;
+    // everything in a location is made from its layout view, so it waits for that and fills in together
+    const fill = (x, inner, cls = '') => `<div class="slot ${cls} ${v.making ? 'working' : ready(x) ? '' : 'empty'}">${v.making ? '<div class="in">From the layout…</div>' : ready(x) ? inner : '<div class="in"><span>made from the layout</span></div>'}</div>`;
+    const redo = (what) => `<div class="sacts"><button data-act="toast" data-t="Fix by prompt: 3–4 new options for this ${what}, from the layout.">${ic('edit', 's')}Fix</button><button data-act="toast" data-t="Redo makes 3–4 new options for this ${what}, from the layout.">${ic('refresh', 's')}Redo</button></div>`;
+    const addTile = (what, ph, label) => `<div class="tile add">${S.adding === what ? `<div class="slot" style="border-style:solid">${ic('plus', 'l')}</div><input id="add-input" data-add="${what}" placeholder="${ph}" maxlength="40" autocomplete="off">` : `<div class="slot" data-act="add" data-what="${what}">${ic('plus', 'l')}</div><div class="tn faint">${label}</div>`}</div>`;
+    let body;
+    if (cur === 'look') {
+      const regs = r.regulars.map((id) => { const c = ref(id); return `<a class="reg" href="#/references/characters/${c.id}"><span class="face">${art(c, 'front', base(c).sheet.front?.opt ?? 0, base(c))}</span>${esc(c.name)}</a>`; }).join('');
+      const areas = `<div class="lb muted small" style="margin-top:20px">Areas <span class="faint">· where scenes happen</span></div><div class="tiles areas">${r.areas.map((x) => `<div class="tile">${fill(x, art(r, `area:${x.id}`) + redo('area'))}<div class="tn">${esc(x.name)}</div><div class="td">${esc(x.scenes || '')}</div></div>`).join('')}${addTile('area', 'kitchen, counter…', 'Add an area')}</div>`;
+      body = `<div class="rbody"><div>${slotHtml(r, v, 'layout', 'wide', 'Layout view')}${areas}</div>
+        <div>${fieldsHtml(r, r.fields, r.ai)}${dirtyLine(r)}
+          <div class="lb muted small" style="margin-top:20px">From the script</div><div style="margin:6px 0 4px"><span class="script-h">${esc(r.heading)}</span></div><div class="muted small">${esc(r.name)} → ${r.areas.length ? esc(r.areas.map((x) => x.name).join(', ')) : 'no areas yet'}. The time of day comes from the script.</div>
+          <div class="lb muted small" style="margin-top:18px">Regulars</div>${regs ? `<div class="regs">${regs}</div>` : '<div class="faint small" style="margin-top:4px">Nobody lives or works here.</div>'}</div></div>`;
+    } else if (cur === 'elements') {
+      body = `<div class="tiles wide">${r.elements.map((x) => `<div class="tile">${fill(x, art(r, `el:${x.id}`) + redo('element'))}<div class="tn">${esc(x.name)}</div><div class="td">${esc(x.note)}</div></div>`).join('')}${addTile('element', 'a window, the counter, the tanks…', 'Add an element')}</div>`;
+    } else if (cur === 'texture') {
+      body = `<div class="tiles">${r.textures.map((x) => `<div class="tile">${fill(x, textureArt(x.kind) + redo('texture'))}<div class="tn">${esc(x.name)}</div><div class="td">${esc(x.where)}</div></div>`).join('')}${addTile('texture', 'brick, tiles, wet stone…', 'Add a texture')}</div>`;
+    } else {
+      const rows = r.lights.map((l) => `<div class="lrow"><div class="lt ${v.making ? 'working' : ready(l) ? '' : 'empty'}">${!v.making && ready(l) ? lightTile(l) : ''}</div><div class="grow"><div class="tn">${esc(l.name)}</div><div class="td">${esc(l.quality)}</div>${l.note ? `<div class="td faint">${esc(l.note)}</div>` : ''}</div></div>`).join('');
+      body = `<div class="rbody"><div>${fill({}, lightPlan(r), 'wide')}<p class="faint small" style="margin-top:10px">The place’s own light. Time of day and weather come from the script and sit on top of it.</p></div>
+        <div><div class="lb muted small" style="margin-bottom:4px">Sources</div>${rows || '<div class="faint small">No light sources yet.</div>'}${S.adding === 'light' ? `<input id="add-input" data-add="light" placeholder="a neon sign, a fridge door…" maxlength="40" autocomplete="off" style="margin-top:10px">` : `<button class="small ghost" style="margin-top:10px" data-act="add" data-what="light">${ic('plus', 's')}Add a light</button>`}</div></div>`;
+    }
+    return `<main class="page">${roomHead(r, v, 'Locations')}${roomTabs(r, tabs, cur)}${body}${usedLine(r, v)}</main>`;
+  }
+
+  // ------------------------------------------------------------ textures and light, drawn in code (SVG noise, gradients)
+  let uid = 0;
+  const rgb = (hex) => { const n = parseInt(hex.slice(1), 16); return [(n >> 16) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255].map((x) => x.toFixed(3)); };
+  const noise = (id, [freq, oct, seed, color, a, b]) => { const [r, g, bl] = rgb(color); return `<filter id="${id}" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency="${freq}" numOctaves="${oct}" seed="${seed}" stitchTiles="stitch"/><feColorMatrix type="matrix" values="0 0 0 0 ${r} 0 0 0 0 ${g} 0 0 0 0 ${bl} ${a} 0 0 0 ${b}"/></filter>`; };
+  const TEX = {
+    concrete: { base: '#b8b5ac', layers: [[0.9, 3, 3, '#000000', 0.8, -0.32], [1.6, 2, 7, '#ffffff', 0.8, -0.34], [0.045, 2, 11, '#7a7873', 9, -5.9]] },
+    steel: { base: '#a8abb1', layers: [['0.012 0.5', 2, 5, '#000000', 0.8, -0.32], ['0.02 0.12', 3, 9, '#9a6a4c', 7, -4.5], [1.4, 2, 4, '#ffffff', 0.6, -0.27]] },
+    paint: { base: '#4e6a5d', layers: [[0.06, 3, 6, '#b3ae9f', 14, -8.3], [1.2, 2, 3, '#000000', 0.6, -0.26], [0.5, 2, 8, '#ffffff', 0.5, -0.22]] },
+    plaster: { base: '#e5e0d5', layers: [[0.45, 3, 2, '#7d7464', 0.7, -0.3], [0.025, 2, 12, '#cdbb92', 4, -2.3]] },
+    lino: { base: '#c8c0ac', defs: (id) => `<pattern id="${id}p" width="25" height="25" patternUnits="userSpaceOnUse"><rect width="12.5" height="12.5" fill="#a99e86"/><rect x="12.5" y="12.5" width="12.5" height="12.5" fill="#a99e86"/></pattern>`, under: (id) => `<rect width="100" height="100" fill="url(#${id}p)"/>`, layers: [[0.8, 2, 4, '#000000', 0.6, -0.26], [0.07, 2, 9, '#e9e4d6', 6, -3.6]] },
+    formica: { base: '#d9d3c4', layers: [[2.4, 1, 3, '#000000', 1.2, -0.66], [2.0, 1, 8, '#ffffff', 1.2, -0.64]] },
+    asphalt: { base: '#55555a', layers: [[1.8, 2, 4, '#ffffff', 1.2, -0.72], [0.7, 3, 6, '#000000', 0.8, -0.32]] },
+    lanepaint: { base: '#4b4b50', under: () => '<rect y="34" width="100" height="30" fill="#e8e6df"/>', layers: [[0.9, 3, 6, '#55555a', 2.4, -1.4], [1.8, 2, 4, '#ffffff', 1.2, -0.72]] },
+    stone: { base: '#b5aa96', defs: (id) => `<pattern id="${id}p" width="50" height="26" patternUnits="userSpaceOnUse"><path d="M0 .5H50M0 13.5H50M25 0V13M0 13V26M50 13V26" stroke="#857b69" stroke-width="1.3" fill="none"/></pattern>`, over: (id) => `<rect width="100" height="100" fill="url(#${id}p)" opacity=".8"/>`, layers: [[0.35, 4, 5, '#000000', 0.8, -0.32], [1.3, 2, 3, '#ffffff', 0.6, -0.27]] },
+    iron: { base: '#6e4b37', layers: [[0.25, 4, 3, '#2e2018', 1.1, -0.45], [0.9, 3, 7, '#b06d3e', 1.1, -0.5]] },
+    canvas: { base: '#9aa4c4', defs: (id) => `<pattern id="${id}s" width="24" height="100" patternUnits="userSpaceOnUse"><rect width="12" height="100" fill="#e7e5df"/></pattern><pattern id="${id}w" width="4" height="4" patternUnits="userSpaceOnUse"><path d="M0 1H4M1 0V4" stroke="#000" stroke-opacity=".12" stroke-width="1"/></pattern>`, under: (id) => `<rect width="100" height="100" fill="url(#${id}s)"/>`, over: (id) => `<rect width="100" height="100" fill="url(#${id}w)"/>`, layers: [[0.6, 3, 4, '#000000', 0.6, -0.26]] },
+  };
+  function textureArt(kind) {
+    const T = TEX[kind] || TEX.plaster, id = `tx${++uid}`;
+    const defs = T.layers.map((l, i) => noise(`${id}-${i}`, l)).join('') + (T.defs ? T.defs(id) : '');
+    return `<svg class="art" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs>${defs}</defs><rect width="100" height="100" fill="${T.base}"/>${T.under ? T.under(id) : ''}${T.layers.map((_, i) => `<rect width="100" height="100" filter="url(#${id}-${i})"/>`).join('')}${T.over ? T.over(id) : ''}</svg>`;
+  }
+  function lightTile(l) {
+    const id = `lt${++uid}`, gy = l.kind === 'glow' ? 100 : l.kind === 'flood' ? 18 : 46;
+    const glyph = { bulb: `<path d="M50 0v36" stroke="#5a5a60" stroke-width="1.6"/><circle cx="50" cy="44" r="6" fill="${l.color}"/>`, window: `<rect x="28" y="26" width="44" height="40" rx="1" fill="${l.color}" fill-opacity=".25" stroke="#8d96ab" stroke-width="2"/><path d="M50 26v40M28 46h44" stroke="#8d96ab" stroke-width="1.6"/>`, lamp: `<path d="M44 100V40h12" stroke="#6a6a70" stroke-width="2.6" fill="none"/><circle cx="58" cy="42" r="4.5" fill="${l.color}"/>`, flood: `<rect x="40" y="12" width="20" height="8" rx="1" fill="${l.color}"/><path d="M50 20v80" stroke="#55555a" stroke-width="2"/>` }[l.kind] || '';
+    return `<svg class="art" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><radialGradient id="${id}" cx="50" cy="${gy}" r="${l.kind === 'glow' ? 80 : 46}" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="${l.color}" stop-opacity=".95"/><stop offset=".45" stop-color="${l.color}" stop-opacity=".35"/><stop offset="1" stop-color="${l.color}" stop-opacity="0"/></radialGradient></defs><rect width="100" height="100" fill="#1c1d23"/><rect width="100" height="100" fill="url(#${id})"/>${glyph}</svg>`;
+  }
+  // the layout view at night-neutral darkness with each source's light where it sits
+  function lightPlan(r) {
+    const opt = base(r).sheet.layout?.opt ?? 0;
+    const t = `${opt % 2 === 1 ? 'translate(320 0) scale(-1 1)' : ''}${opt >= 2 ? ' translate(0 6)' : ''}`;
+    let defs = '', glows = '';
+    r.lights.forEach((l) => { const id = `lp${++uid}`; defs += `<radialGradient id="${id}"><stop offset="0" stop-color="${l.color}" stop-opacity=".9"/><stop offset=".4" stop-color="${l.color}" stop-opacity=".35"/><stop offset="1" stop-color="${l.color}" stop-opacity="0"/></radialGradient>`; (l.at || []).forEach(([x, y]) => (glows += `<circle cx="${x}" cy="${y}" r="${l.r || 60}" fill="url(#${id})"/>`)); });
+    return `<svg class="art" viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs>${defs}</defs><rect class="bg" width="320" height="180"/><g transform="${t}">${PLACES[r.place] || ''}</g><rect width="320" height="180" fill="#0b0d16" opacity=".68"/><g transform="${t}" style="mix-blend-mode:screen">${glows}</g></svg>`;
+  }
+
+  // ------------------------------------------------------------ voices: play a sample; Production → Sound lists them all
+  const fmt = (x) => `0:${String(Math.floor(x)).padStart(2, '0')}`;
+  const audio = new Audio();
+  audio.addEventListener('ended', () => { S.playing = null; render(); });
+  function player(id) {
+    const m = MEDIA.voice[id]; if (!m) return '';
+    const on = S.playing === id, busy = S.remaking[id];
+    return `<div class="player ${busy ? 'busy' : ''}"><button class="play" data-act="play" data-id="${id}" title="${on ? 'Pause' : 'Play'}" ${busy ? 'disabled' : ''}>${ic(on ? 'pause' : 'play', 'fill')}</button><div class="wave" data-act="wave" data-id="${id}" data-wave="${id}">${m.peaks.map((p) => `<i style="height:${Math.max(6, Math.round(p * 100))}%"></i>`).join('')}</div><span class="ptime" data-ptime="${id}">${fmt(m.dur)}</span></div>`;
+  }
+  function playVoice(id, frac) {
+    const m = MEDIA.voice[id]; if (!m) return;
+    if (S.playing === id && frac === undefined) { audio.pause(); S.playing = null; return render(); }
+    if (S.playing !== id) { audio.src = m.src; audio.currentTime = 0; }
+    if (frac !== undefined) audio.currentTime = Math.max(0, Math.min(0.98, frac)) * m.dur;
+    S.playing = id;
+    audio.play().catch(() => { S.playing = null; render(); toast('The browser held the sound back. Press play again.'); });
+    render();
+  }
+  (function loop() {
+    if (S.playing) {
+      const m = MEDIA.voice[S.playing], p = Math.min(1, audio.currentTime / m.dur);
+      app.querySelectorAll(`[data-wave="${S.playing}"]`).forEach((w) => { const k = Math.round(p * w.children.length); [...w.children].forEach((bar, i) => bar.classList.toggle('past', i < k)); });
+      app.querySelectorAll(`[data-ptime="${S.playing}"]`).forEach((el) => (el.textContent = fmt(audio.currentTime)));
+    }
+    app.querySelectorAll('video[data-clip]').forEach((vd) => { const bar = app.querySelector(`[data-cbar="${vd.dataset.clip}"]`); if (bar && vd.duration) bar.style.width = `${(vd.currentTime / vd.duration) * 100}%`; });
+    requestAnimationFrame(loop);
+  })();
+  function soundPage(focus) {
+    const rows = S.refs.filter((x) => x.kind === 'character').map((c) => {
+      const m = MEDIA.voice[c.id], vd = (k) => (c.voice.find(([l]) => l === k) || [])[1] || '';
+      const sum = [vd('Pitch / tone'), vd('Accent'), vd('Pace / rhythm')].filter(Boolean).join(' · ');
+      const face = c.voiceOnly || base(c).sheet.front?.opt === undefined ? ic('wave', 's') : art(c, 'front', base(c).sheet.front.opt, base(c));
+      return `<div class="vrow ${focus === c.id ? 'hl' : ''}"><span class="vf">${face}</span><div class="vn"><b>${esc(c.name)}</b><span>${esc(sum || 'No voice description yet')}</span></div>${m ? player(c.id) : '<div class="faint small">No sample yet</div>'}<div class="vacts">${S.voiceDirty[c.id] ? st('stale').replace('Stale', 'older description') : ''}<button class="small" data-act="remake" data-id="${c.id}">${ic('refresh', 's')}${m ? 'Remake' : 'Make'}</button><a class="btn" href="#/references/characters/${c.id}/voice">Description</a></div></div>`;
+    }).join('');
+    return `<main class="page"><h2 class="secth">Voices <span class="muted small">one sample per character, made from its Voice description in References</span></h2>${rows}
+      <h2 class="secth" style="margin-top:30px;color:var(--t3)">Lines <span class="small">every line of dialogue in these voices, shot by shot · next</span></h2></main>`;
+  }
+
+  // ------------------------------------------------------------ Generate: the panel, only when asked
+  function genPanel() {
+    const g = S.gen; if (!g) return '';
+    const r = ref(g.ref), v = vOf(r, g.v);
+    const slotLabel = SLOTNAME[g.slot] || g.slot;
+    const shape = r.kind === 'location' ? 'wideopts' : r.kind === 'prop' ? 'sq' : '';
+    const from = v.id !== 'default' ? `<b>${esc(v.name)}</b>: ${esc(v.delta)}.` : r.kind === 'character' ? `<b>${esc(r.name)}</b>: ${esc(r.fields.map((f) => f[2]).filter(Boolean).join(', '))}.` : `<b>${esc(r.name)}</b>: ${esc(r.fields.map((f) => f[2]).filter(Boolean).join(', '))}.`;
+    const opts = [0, 1, 2, 3].map((i) => g.phase === 'working'
+      ? `<div class="opt working"><div class="in"></div></div>`
+      : `<button class="opt" data-act="pick" data-i="${i}">${art(r, g.slot, i, v)}<span class="use">Use this</span></button>`).join('');
+    return `<aside class="gen ${shape}">
+      <div class="gh"><div class="grow"><div class="gt">${ic('sparkle', 's')} ${esc(slotLabel)} · ${esc(r.name)}${v.id !== 'default' ? ` · ${esc(v.name)}` : ''}</div><div class="gs">${g.phase === 'working' ? 'Making 4 options…' : 'Pick one. The rest are made from it.'}</div></div><button class="icon" data-act="gen-x" title="close">${ic('x')}</button></div>
+      <div class="opts">${opts}</div>
+      <div class="gfrom">From ${from}${g.fixText ? ` Fix: <b>${esc(g.fixText)}</b>.` : ''}</div>
+      <form class="gf" data-form="fix"><input id="gen-fix" data-fix placeholder="Fix: shorter hair, add a scar…" autocomplete="off"><button class="small" title="make 4 new options">${ic('refresh', 's')}</button></form>
+    </aside>`;
+  }
+  function startGen(rid, slot, fix) {
+    const r = ref(rid), v = vOf(r);
+    S.gen = { ref: rid, v: v.id, slot, phase: 'working', fixText: '' };
+    if (v.status !== 'review' && v.status !== 'approved') v.status = 'generating';
+    render();
+    setTimeout(() => { if (S.gen && S.gen.ref === rid) { S.gen.phase = 'options'; render(); if (fix) app.querySelector('[data-fix]')?.focus(); } }, fix ? 300 : 1300);
+  }
+  function pick(i) {
+    const g = S.gen; const r = ref(g.ref), v = vOf(r, g.v);
+    const first = FIRST[r.kind];
+    S.gen = null;
+    v.sheet[g.slot] = { opt: i };
+    if (g.slot !== first) { toast(`${SLOTNAME[g.slot] || g.slot} replaced.`); if (v.status === 'approved') { S.dirty[r.id] = true; } return render(); }
+    // the rest are made from the picked one
+    const rest = r.kind === 'character' ? ['side', 'back'] : r.kind === 'prop' ? ['side', 'back', 'top', 'scale'] : [];
+    rest.forEach((s) => (v.sheet[s] = 'working'));
+    if (r.kind === 'character') v.exprWorking = true;
+    if (r.kind === 'location') v.making = true;
+    v.status = 'review';
+    if (S.stale.pendingVariant === v.id) delete S.stale.pendingVariant;
+    toast(r.kind === 'location' ? 'Layout picked. Areas, elements, textures and light are made from it.' : r.kind === 'character' ? 'Front picked. Side, back and expressions are made from it.' : 'Front picked. The other angles and the scale are made from it.');
+    render();
+    setTimeout(() => {
+      rest.forEach((s) => (v.sheet[s] = { opt: i }));
+      if (r.kind === 'character') { v.exprWorking = false; if (v.id === 'default') r.exprDone = true; else v.exprDone = true; }
+      if (r.kind === 'location') { v.making = false; [...r.areas, ...r.elements, ...r.textures, ...r.lights].forEach((x) => (x.done = true)); }
+      render();
+    }, 1500);
+  }
+
+  // ------------------------------------------------------------ Production: where references land (a glimpse of the next section)
+  const SCENES = [
+    { title: '3 · The rooftop', loc: 'roof', shots: [
+      { n: '3.1', fr: 'WS', act: 'Maya waits by the ledge, the envelope inside her jacket.', chars: [['maya', 'default']], area: 'ledge', props: ['envelope'] },
+      { n: '3.2', fr: 'MS', act: 'Omar steps out of the stairwell. Wet suit, no umbrella.', chars: [['omar', 'default']], area: 'stair', props: [] },
+      { n: '3.4', fr: 'ECU', act: 'He takes one step. She takes one back. Her heel finds the edge.', chars: [['maya', 'default']], area: 'ledge', props: [] },
+    ] },
+    { title: '4 · Chase', loc: 'alleys', shots: [
+      { n: '4.1', fr: 'WS', act: 'Maya flies down the fire escape, three steps at a time.', chars: [['maya', 'cut']], area: 'fire', props: ['satchel'] },
+    ] },
+  ];
+  function refChip(r, v, label, extra = '') {
+    const s = status(r, v);
+    const has = v.sheet[FIRST[r.kind]]?.opt !== undefined;
+    const q = s === 'approved' ? `v${v.version}` : s === 'review' ? 'not approved yet' : s === 'awaiting' ? 'not generated yet' : ST[s][0].toLowerCase();
+    return `<a class="rchip ${s === 'awaiting' || s === 'draft' ? 'warn' : ''}" href="#/references/${PLURAL[r.kind]}/${r.id}" data-act="go-var" data-ref="${r.id}" data-v="${v.id}"><span class="th ${r.kind === 'character' ? '' : 'sq'}">${has ? art(r, FIRST[r.kind], v.sheet[FIRST[r.kind]].opt, v) : ''}</span>${label}${extra}<span class="q">· ${q}</span></a>`;
+  }
+  function production() {
+    const scenes = SCENES.map((sc) => {
+      const L = ref(sc.loc);
+      return `<section class="scn"><h2>${esc(sc.title)}<span class="muted small">${esc(L.heading)}</span></h2>${sc.shots.map((sh) => {
+        const chips = [
+          ...sh.chars.map(([id, vid]) => { const r = ref(id), v = vOf(r, vid); return refChip(r, v, esc(r.name), v.id !== 'default' ? ` · ${esc(v.name)}` : ''); }),
+          refChip(L, base(L), `${esc(L.name)} · ${esc((L.areas.find((a) => a.id === sh.area) || {}).name || '')}`),
+          ...sh.props.map((id) => refChip(ref(id), base(ref(id)), esc(ref(id).name))),
+          `<span class="rchip addp" data-act="toast" data-t="Props are added to a shot by hand.">${ic('plus', 's')}prop</span>`,
+        ].join('');
+        const stale = S.stale[sh.n];
+        const staleLine = stale ? `<div class="staleline">${ic('alert', 's')}<span>Made with an old ${esc(ref(stale.ref).name)} (v${stale.was}).</span><span class="grow"></span><button class="small" data-act="stale" data-n="${sh.n}" data-how="Kept as it is (a flashback, say).">Keep</button><button class="small" data-act="stale" data-n="${sh.n}" data-how="Regenerating with the new version.">Regenerate</button><button class="small" data-act="stale" data-n="${sh.n}" data-how="Adjusting only what changed.">Adjust</button></div>` : '';
+        return `<div class="shot"><div class="kf">The frame comes here, built from these</div><div><div class="sh"><span class="num">${sh.n}</span><span class="fr">${sh.fr}</span>${stale ? st('stale') : ''}</div><div class="act">${esc(sh.act)}</div><div class="rchips">${chips}</div>${staleLine}</div></div>`;
+      }).join('')}</section>`;
+    }).join('');
+    return `<main class="page"><p class="faint small" style="margin:0 0 18px">The next section. Here only to show where references land: each shot picks its characters (the right variant for the scene), its location area, and the props added by hand.</p>${scenes}</main>`;
+  }
+  const ghost = (name, line) => `<main class="ghostpage"><p>${esc(name)} as it is now. ${esc(line)}</p>${[90, 70, 84, 60, 76, 40].map((w) => `<div class="gl" style="width:${w}%"></div>`).join('')}</main>`;
+
+  // ------------------------------------------------------------ render
+  function render(top = false) {
+    const r = route();
+    let body;
+    if (r.tab === 'references') {
+      const x = r.b && ref(r.b);
+      body = x ? (x.kind === 'character' ? characterRoom(x, r.c) : x.kind === 'prop' ? propRoom(x, r.c) : locationRoom(x, r.c)) : gallery(r);
+    } else if (r.tab === 'production') body = r.a === 'sound' ? soundPage(r.b) : production();
+    else if (r.tab === 'brainstorm') body = ghost('Brainstorm', 'Its own tabs (Sessions, Promoted, History) moved into the row above; nothing else changes.');
+    else body = ghost('Script', 'Its draft switcher, Home · Write · Board · Shots and its rooms moved into the row above; nothing else changes.');
+    document.title = `π · Rainline · ${{ references: 'References', production: 'Production', brainstorm: 'Brainstorm', script: 'Script' }[r.tab] || ''}`;
+    const y = top ? 0 : window.scrollY;
+    app.innerHTML = header(r) + body + genPanel();
+    window.scrollTo(0, y);
+    if (top) app.querySelector('.vrow.hl')?.scrollIntoView({ block: 'center' });
+    const nf = app.querySelector('[data-newname], [data-add]');
+    if (nf) nf.focus();
+  }
+
+  // ------------------------------------------------------------ actions
+  app.addEventListener('click', (e) => {
+    if (S.menu && !e.target.closest('.menuwrap')) { S.menu = null; render(); }
+    const b = e.target.closest('[data-act]');
+    if (!b) return;
+    const ds = b.dataset, act = ds.act;
+    if (act === 'menu') { e.stopPropagation(); S.menu = S.menu === ds.menu ? null : ds.menu; return render(); }
+    if (b.classList.contains('mi')) S.menu = null;
+    if (act === 'noop') return render();
+    if (act === 'toast') { toast(ds.t); return render(); }
+    if (act === 'open-ref') { if (e.target.closest('.cmenu, .menu')) return; return go(ds.href); }
+    if (act === 'go-var') { S.variant[ds.ref] = ds.v; return; }
+    if (act === 'attn') { S.attnOpen = !S.attnOpen; return render(); }
+    if (act === 'as') { S.me = S.me === 'Hadi' ? 'Abdallah' : 'Hadi'; toast(`You are ${S.me} now.`); return render(); }
+    if (act === 'new-open') { S.newForm = KIND[route().a] || 'character'; if (route().b) return go(`#/references/${route().a}`); return render(); }
+    if (act === 'new-x') { S.newForm = null; return render(); }
+    if (act === 'variant') { S.variant[ds.ref] = ds.v; return render(); }
+    if (act === 'owner') { ref(ds.ref).owner = ds.n; toast(`${ds.n} owns ${ref(ds.ref).name} now.`); return render(); }
+    if (act === 'gen') return startGen(ds.ref, ds.slot, !!ds.fix);
+    if (act === 'gen-x') { const g = S.gen; S.gen = null; if (g) { const v = vOf(ref(g.ref), g.v); if (v.status === 'generating') v.status = v.id === 'default' ? 'draft' : 'awaiting'; } return render(); }
+    if (act === 'pick') return pick(Number(ds.i));
+    if (act === 'approve') { const r = ref(ds.ref), v = vOf(r); v.status = 'approved'; v.version = Math.max(1, v.version); toast(`${r.name}${v.id !== 'default' ? ` · ${v.name}` : ''} is approved. Shots use it now.`); return render(); }
+    if (act === 'give-face') { ref(ds.ref).voiceOnly = false; return render(); }
+    if (act === 'add') { S.adding = ds.what; return render(); }
+    if (act === 'save-version') {
+      const r = ref(ds.ref), v = base(r); const was = v.version; v.version++; S.dirty[r.id] = false; delete S.orig[r.id];
+      v.usedIn.forEach((n) => { S.stale[n] = { ref: r.id, was }; });
+      toast(`Saved as v${v.version}. v${was} is kept; ${plural(v.usedIn.length, 'shot')} marked Stale.`); return render();
+    }
+    if (act === 'undo-edit') { const r = ref(ds.ref); if (S.orig[r.id]) r.fields = S.orig[r.id]; delete S.orig[r.id]; S.dirty[ds.ref] = false; toast('Back as it was.'); return render(); }
+    if (act === 'play') return playVoice(ds.id);
+    if (act === 'wave') { const box = b.getBoundingClientRect(); return playVoice(ds.id, (e.clientX - box.left) / box.width); }
+    if (act === 'remake') {
+      const id = ds.id;
+      if (!MEDIA.voice[id]) { toast('In the app this makes a first sample with the voice model.'); return render(); }
+      if (S.playing === id) { audio.pause(); S.playing = null; }
+      S.remaking[id] = true; render();
+      setTimeout(() => { S.remaking[id] = false; S.voiceDirty[id] = false; toast(`New sample for ${ref(id).name}, from the description as it is now.`); render(); }, 1400);
+      return;
+    }
+    if (act === 'clip') {
+      const vd = app.querySelector(`video[data-clip="${ds.id}"]`); if (!vd) return;
+      if (vd.paused) vd.play(); else vd.pause();
+      S.clipPaused[ds.id] = vd.paused;
+      vd.closest('.clip').classList.toggle('paused', vd.paused);
+      b.innerHTML = ic(vd.paused ? 'play' : 'pause', 'fill');
+      return;
+    }
+    if (act === 'clip-redo') { const id = ds.id; S.clipMaking = id; render(); setTimeout(() => { S.clipMaking = null; S.motionDirty[id] = false; toast('New clip, from the front and the text as it is now.'); render(); }, 1600); return; }
+    if (act === 'stale') { delete S.stale[ds.n]; toast(`${ds.n}: ${ds.how}`); return render(); }
+  });
+  app.addEventListener('input', (e) => {
+    const t = e.target;
+    if (t.matches('[data-motion]')) { const r = ref(t.dataset.motion); r.motion = t.textContent; if (MEDIA.motion[r.id]) { S.motionDirty[r.id] = true; app.querySelector(`[data-mdirty="${r.id}"]`)?.classList.add('on'); } return; }
+    if (t.matches('.val[data-ref]')) {
+      const r = ref(t.dataset.ref), k = t.dataset.field, list = t.dataset.list;
+      if (list !== 'voice' && base(r).status === 'approved' && !S.orig[r.id]) S.orig[r.id] = JSON.parse(JSON.stringify(r.fields)); // what Undo goes back to
+      if (list === 'voice') { const i = Number(k.slice(1)); r.voice[i][1] = t.textContent; r.voiceAi = false; if (MEDIA.voice[r.id]) { S.voiceDirty[r.id] = true; app.querySelector(`[data-vdirty="${r.id}"]`)?.classList.add('on'); } }
+      else { const f = r.fields.find((x) => x[0] === k); if (f) f[2] = t.textContent; r.ai = r.ai.filter((x) => x !== k); }
+      t.closest('.fld')?.querySelector('[data-aitag]')?.remove(); // edited by a person: no longer a suggestion
+      if (base(r).status === 'approved' && list !== 'voice') { S.dirty[r.id] = true; app.querySelector(`[data-dirty="${r.id}"]`)?.classList.add('on'); }
+    }
+  });
+  app.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const f = e.target;
+    if (f.dataset.form === 'new') {
+      const name = f.querySelector('[data-newname]').value.trim(); if (!name) return;
+      const kind = S.newForm, id = `n${Date.now().toString(36)}`;
+      const fields = kind === 'character' ? [['age', 'Age', ''], ['build', 'Build', ''], ['face', 'Face', ''], ['hair', 'Hair', ''], ['marks', 'Marks', '']] : kind === 'prop' ? [['what', 'What it is', ''], ['material', 'Material', ''], ['color', 'Colour', ''], ['details', 'Details', '']] : [['what', 'What it is', ''], ['mood', 'Mood', ''], ['era', 'Era', ''], ['details', 'Key details', '']];
+      S.refs.push({ id, kind, name, line: 'New', owner: S.me, source: `Added by ${S.me}`, looks: kind === 'character' ? ['short', 'swept', 'bun', 'long'] : [0, 1, 2, 3], fields, ai: [], place: 'fish', heading: `INT. ${name.toUpperCase()} – (from the script)`, areas: [], elements: [], textures: [], lights: [], regulars: [], states: [], expressions: [['neutral'], ['happy'], ['angry'], ['sad'], ['scared'], ['surprised']], exprDone: false, outfits: [], motion: '', voice: [['Age / gender feel', ''], ['Pitch / tone', ''], ['Accent', ''], ['Pace / rhythm', ''], ['Emotional range', ''], ['Sample line', '']], variants: [{ id: 'default', name: 'Default', range: '', status: 'draft', version: 0, sheet: {}, usedIn: [] }] });
+      S.newForm = null;
+      return go(`#/references/${PLURAL[kind]}/${id}`);
+    }
+    if (f.dataset.form === 'fix') {
+      const txt = f.querySelector('[data-fix]').value.trim(); if (!txt || !S.gen) return;
+      S.gen.phase = 'working'; S.gen.fixText = txt; render();
+      setTimeout(() => { if (S.gen) { S.gen.phase = 'options'; render(); } }, 1200);
+    }
+  });
+  app.addEventListener('keydown', (e) => {
+    const t = e.target;
+    if (t.dataset.add !== undefined) {
+      if (e.key === 'Escape') { S.adding = null; return render(); }
+      if (e.key !== 'Enter') return;
+      const name = t.value.trim(); if (!name) return;
+      const r = ref(route().b), what = t.dataset.add;
+      if (what === 'expr') r.expressions.push([name.toLowerCase(), S.me]);
+      if (what === 'outfit') r.outfits.push({ id: `o${Date.now()}`, name, note: '', tone: 'fg2', done: true });
+      if (what === 'state') r.states.push({ id: 'open', name, done: true });
+      if (what === 'area') r.areas.push({ id: `a${Date.now()}`, name, crop: [80, 40, 160, 90], done: true });
+      if (what === 'element') r.elements.push({ id: `e${Date.now()}`, name, note: '', crop: [60, 30, 160, 90], done: true });
+      if (what === 'texture') r.textures.push({ name, where: '', kind: ['plaster', 'concrete', 'stone', 'formica'][r.textures.length % 4], done: true });
+      if (what === 'light') r.lights.push({ name, kind: 'bulb', color: '#ffd38a', quality: 'Warm or cold, hard or soft, from where', note: '', at: [[160, 60]], r: 60, done: true });
+      S.adding = null; toast(`${name} added. Its image is made from the ${r.kind === 'location' ? 'layout' : 'front'}.`); render();
+    }
+    if (e.key === 'Escape' && S.gen) { S.gen = null; render(); }
+  });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && S.menu) { S.menu = null; render(); } });
+
+  render();
+})();
+</script>
+</body>
+</html>
