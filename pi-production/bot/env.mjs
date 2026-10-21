@@ -11,3 +11,5 @@ export const LOCAL = /^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(:|\/|$)/.test
 // long-polls stay under the ~60 s idle cut most hosting proxies apply
 export const POLL_MS = LOCAL ? 100000 : 50000;
 export const headers = (extra = {}) => ({ ...extra, ...(process.env.PI_BOT_KEY ? { authorization: `Bearer ${process.env.PI_BOT_KEY}` } : {}) });
+// which terminal this is — two people's bots can wait on one app; the same id reconnecting replaces itself
+export const BOT_ID = process.env.PI_BOT_ID || (process.env.USER || 'bot');

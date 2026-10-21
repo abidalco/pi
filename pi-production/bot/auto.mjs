@@ -7,7 +7,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { BASE, POLL_MS, headers } from './env.mjs';
+import { BASE, POLL_MS, BOT_ID, headers } from './env.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const MODEL = process.env.PI_BOT_MODEL || '';
@@ -112,7 +112,7 @@ let down = false;
 for (;;) {
   let d;
   try {
-    const r = await fetch(`${BASE}/api/bot/next?timeout=${POLL_MS}`, { headers: headers(), signal: AbortSignal.timeout(POLL_MS + 15000) });
+    const r = await fetch(`${BASE}/api/bot/next?bot=${encodeURIComponent(BOT_ID)}&timeout=${POLL_MS}`, { headers: headers(), signal: AbortSignal.timeout(POLL_MS + 15000) });
     d = await r.json();
     if (r.status === 401) { log(d.error); process.exit(1); }
     if (down) { log(`back in touch with ${BASE}`); down = false; }

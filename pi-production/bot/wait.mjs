@@ -6,7 +6,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { BASE, POLL_MS, headers } from './env.mjs';
+import { BASE, POLL_MS, BOT_ID, headers } from './env.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const fresh = process.argv.includes('--fresh');
@@ -16,7 +16,7 @@ let res;
 try {
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), timeout + 15000);
-  res = await fetch(`${BASE}/api/bot/next?timeout=${timeout}${fresh ? '&fresh=1' : ''}`, { headers: headers(), signal: ctrl.signal });
+  res = await fetch(`${BASE}/api/bot/next?bot=${encodeURIComponent(BOT_ID)}&timeout=${timeout}${fresh ? '&fresh=1' : ''}`, { headers: headers(), signal: ctrl.signal });
   clearTimeout(t);
 } catch (e) {
   console.log(JSON.stringify({ error: `cannot reach ${BASE} (${e.cause?.code || e.name})`, hint: 'start the app first: npm start (in pi-production/), then run me again' }));

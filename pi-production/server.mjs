@@ -51,14 +51,15 @@ function picture(c, memo = {}) {
 
 // ---------- the bot: one queue across projects and sections, one long-poll waiter ----------
 const BOT_SEEN_WINDOW = 3 * 60 * 1000;
-let botWaiter = null;   // { res, timer }
+const botWaiters = [];  // one long-poll per connected bot terminal: { id, res, timer } — oldest waiter gets the next delivery
+const dropWaiter = (w) => { const i = botWaiters.indexOf(w); if (i >= 0) botWaiters.splice(i, 1); clearTimeout(w.timer); };
 let botLastSeen = 0;
-const botOnline = () => !!botWaiter || Date.now() - botLastSeen < BOT_SEEN_WINDOW;
+const botOnline = () => botWaiters.length > 0 || Date.now() - botLastSeen < BOT_SEEN_WINDOW;
 SC.setBotOnline(botOnline);
 const allProjects = () => { const out = []; for (const p of listProjects()) { try { out.push(open(p.id)); } catch {} } return out; };
 // the oldest thing waiting goes first: a brainstorm batch (one session's events) or one script job
 function tryDeliver() {
-  if (!botWaiter) return;
+  if (!botWaiters.length) return;
   const all = allProjects();
   const batch = BS.pendingBatch(all);
   const sjob = SC.pendingJob(all), rjob = RF.pendingJob(all);
@@ -73,8 +74,7 @@ function tryDeliver() {
     BS.setBusy(batch.p, batch.session, true);
     out = { section: 'brainstorm', events: batch.jobs.map(BS.jobEvent), ...BS.botContext(batch.p, batch.session) };
   }
-  const { res, timer } = botWaiter;
-  clearTimeout(timer); botWaiter = null; botLastSeen = Date.now();
+  const w = botWaiters[0]; dropWaiter(w); const { res } = w; botLastSeen = Date.now();
   try { res.writeHead(200, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' }); res.end(JSON.stringify(out)); } catch {}
   changed();
 }
@@ -165,13 +165,15 @@ const server = http.createServer(async (req, res) => {
     const all = allProjects();
     if (url.searchParams.get('fresh')) for (const pr of all) { try { pr.run("UPDATE jobs SET status = 'done' WHERE section = 'brainstorm' AND status = 'pending'"); } catch {} }
     for (const pr of all) { try { SC.requeueStale(pr); RF.requeueStale(pr); } catch {} }
-    if (botWaiter) { clearTimeout(botWaiter.timer); json(botWaiter.res, 200, { idle: true, replaced: true }); botWaiter = null; }
+    const botId = String(url.searchParams.get('bot') || 'bot').slice(0, 40);
+    for (const o of botWaiters.filter((x) => x.id === botId)) { dropWaiter(o); json(o.res, 200, { idle: true, replaced: true }); } // same terminal reconnecting
     const timeout = Math.min(Number(url.searchParams.get('timeout')) || 100000, 590000);
-    const timer = setTimeout(() => { if (botWaiter?.res === res) { botWaiter = null; json(res, 200, { idle: true }); changed(); } }, timeout);
-    botWaiter = { res, timer };
-    req.on('close', () => { if (botWaiter?.res === res) { clearTimeout(timer); botWaiter = null; changed(); } });
+    const w = { id: botId, res, timer: null };
+    w.timer = setTimeout(() => { if (botWaiters.includes(w)) { dropWaiter(w); json(res, 200, { idle: true }); changed(); } }, timeout);
+    botWaiters.push(w);
+    req.on('close', () => { if (botWaiters.includes(w)) { dropWaiter(w); changed(); } });
     tryDeliver();
-    if (botWaiter) changed(); // now online
+    if (botWaiters.includes(w)) changed(); // now online
     return;
   }
   if (p === '/api/bot/context' && req.method === 'GET') {
