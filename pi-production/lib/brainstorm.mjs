@@ -11,11 +11,14 @@ const stageOf = (s) => tpl(s).stages[s.stage];
 const live = (s) => s.status === 'live';
 const err = (msg, code = 400) => Object.assign(new Error(msg), { code });
 
-// the sessions the bot is thinking about right now (a delivery went out, no answer yet); not persisted
-const busy = new Set();
+// a session the bot is answering right now: key → since. With two bot terminals online, new events in that
+// session wait for the reply instead of going to the other terminal (two replies racing in one chat).
+// A terminal that never answers lets go after BUSY_HOLD_MS, and the next waiter picks the session up.
+const busy = new Map();
+const BUSY_HOLD_MS = 3 * 60 * 1000;
 const busyKey = (p, sid) => `${p.id}/${sid}`;
-export const isBusy = (p, sid) => busy.has(busyKey(p, sid));
-export const setBusy = (p, sid, on) => { if (on) busy.add(busyKey(p, sid)); else busy.delete(busyKey(p, sid)); };
+export const isBusy = (p, sid) => { const t = busy.get(busyKey(p, sid)); return !!t && Date.now() - t < BUSY_HOLD_MS; };
+export const setBusy = (p, sid, on) => { if (on) busy.set(busyKey(p, sid), Date.now()); else busy.delete(busyKey(p, sid)); };
 
 // ---------------------------------------------------------------- rows ↔ the objects the game logic works on
 const FLOW = ['candidates', 'verdicts', 'thumbs', 'winner', 'tied', 'round'];
@@ -149,8 +152,12 @@ export function botContext(p, sid) {
 export function pendingBatch(projects) {
   let best = null;
   for (const p of projects) {
-    const j = p.one("SELECT ts, payload_json FROM jobs WHERE section = 'brainstorm' AND status = 'pending' ORDER BY ts LIMIT 1");
-    if (j && (!best || j.ts < best.ts)) best = { p, ts: j.ts, session: P(j.payload_json, {}).session };
+    for (const j of p.all("SELECT ts, payload_json FROM jobs WHERE section = 'brainstorm' AND status = 'pending' ORDER BY ts")) {
+      const session = P(j.payload_json, {}).session;
+      if (isBusy(p, session)) continue; // still being answered: it waits for that reply
+      if (!best || j.ts < best.ts) best = { p, ts: j.ts, session };
+      break;
+    }
   }
   if (!best) return null;
   const rows = best.p.all("SELECT * FROM jobs WHERE section = 'brainstorm' AND status = 'pending' ORDER BY ts").map(Project.row).filter((j) => j.payload?.session === best.session);
@@ -159,6 +166,16 @@ export function pendingBatch(projects) {
 export function markDelivered(p, jobs) {
   const t = now();
   for (const j of jobs) p.run("UPDATE jobs SET status = 'delivered', delivered_at = ? WHERE id = ?", t, j.id);
+}
+// a terminal took a batch and never answered (closed, crashed): after the hold, the events go back in line for the other one
+export function requeueStale(p) {
+  const cut = now() - BUSY_HOLD_MS;
+  for (const j of p.all("SELECT id, payload_json FROM jobs WHERE section = 'brainstorm' AND status = 'delivered' AND delivered_at < ?", cut)) {
+    const session = P(j.payload_json, {}).session;
+    if (isBusy(p, session)) continue;
+    setBusy(p, session, false);
+    p.run("UPDATE jobs SET status = 'pending' WHERE id = ?", j.id);
+  }
 }
 export const jobEvent = (j) => ({ id: j.id, type: j.type, ts: j.ts, ...(j.payload || {}) });
 

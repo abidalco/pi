@@ -5,6 +5,7 @@
 // Every open tab gets the whole picture pushed over SSE whenever any project changes.
 import http from 'node:http';
 import fs from 'node:fs';
+import crypto from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { setProjectsDir, listProjects, openProject, createProject, deleteProject } from './lib/projects.mjs';
@@ -143,6 +144,17 @@ const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://x');
   const p = url.pathname;
 
+  // online: the bot routes need PI_BOT_KEY, everything else needs the team password (PI_SITE_PASSWORD). Both unset = open (local).
+  const BOT_KEY = process.env.PI_BOT_KEY || '', SITE_PW = process.env.PI_SITE_PASSWORD || '';
+  const same = (a, b) => { const x = Buffer.from(a), y = Buffer.from(b); return x.length === y.length && crypto.timingSafeEqual(x, y); };
+  if (p.startsWith('/api/bot/') && BOT_KEY) {
+    if (!same(req.headers.authorization || '', `Bearer ${BOT_KEY}`)) { res.writeHead(401, { 'content-type': 'application/json' }); return res.end('{"error":"bad bot key"}'); }
+  } else if (SITE_PW && p !== '/healthz') {
+    const given = Buffer.from((req.headers.authorization || '').replace(/^Basic /, ''), 'base64').toString().split(':').slice(1).join(':');
+    if (!same(given, SITE_PW)) { res.writeHead(401, { 'www-authenticate': 'Basic realm="π production"' }); return res.end('password needed'); }
+  }
+  if (p === '/healthz') { res.writeHead(200); return res.end('ok'); }
+
   if (p === '/events') {
     res.writeHead(200, { 'content-type': 'text/event-stream', 'cache-control': 'no-store', connection: 'keep-alive', 'x-accel-buffering': 'no' });
     const c = { res, who: String(url.searchParams.get('who') || '').slice(0, 40), project: url.searchParams.get('project') || null, session: url.searchParams.get('session') || null, section: url.searchParams.get('section') || null };
@@ -164,7 +176,7 @@ const server = http.createServer(async (req, res) => {
     botLastSeen = Date.now();
     const all = allProjects();
     if (url.searchParams.get('fresh')) for (const pr of all) { try { pr.run("UPDATE jobs SET status = 'done' WHERE section = 'brainstorm' AND status = 'pending'"); } catch {} }
-    for (const pr of all) { try { SC.requeueStale(pr); RF.requeueStale(pr); } catch {} }
+    for (const pr of all) { try { SC.requeueStale(pr); RF.requeueStale(pr); BS.requeueStale(pr); } catch {} }
     const botId = String(url.searchParams.get('bot') || 'bot').slice(0, 40);
     for (const o of botWaiters.filter((x) => x.id === botId)) { dropWaiter(o); json(o.res, 200, { idle: true, replaced: true }); } // same terminal reconnecting
     const timeout = Math.min(Number(url.searchParams.get('timeout')) || 100000, 590000);
@@ -186,7 +198,7 @@ const server = http.createServer(async (req, res) => {
     botLastSeen = Date.now();
     let pr;
     try { pr = open(String(b.project || '')); } catch { return fail(res, `no such project: ${b.project}`, 404); }
-    try { const out = BS.botSay(pr, b); changed(); return json(res, 200, out); }
+    try { const out = BS.botSay(pr, b); changed(); tryDeliver(); return json(res, 200, out); } // tryDeliver: events that waited on this reply go out now
     catch (e) { return fail(res, e.message, e.code || 400); }
   }
   if (p === '/api/bot/done' && req.method === 'POST') { // Script: the answer to one job
