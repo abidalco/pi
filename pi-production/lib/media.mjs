@@ -2,6 +2,8 @@
 //   images  mock    code-drawn placeholders (lib/refart.mjs), free, the default
 //           openai  PI_IMAGES=openai + OPENAI_API_KEY (model PI_IMAGE_MODEL, default gpt-image-1).
 //                   Billed per image by OpenAI; PI_IMAGE_CAP caps a project's images per month (default 200).
+//           codex   PI_IMAGES=codex: no key on the server. Image jobs wait here for an image terminal (npm run images),
+//                   which makes them with Codex CLI on that person's ChatGPT subscription and sends the PNGs back.
 //   voice   say     this Mac's own voices + ffmpeg, free and local (macOS only)
 //   video   none yet: people upload their own clip
 import { spawn, spawnSync } from 'node:child_process';
@@ -21,9 +23,10 @@ const voicesHere = () => {
 };
 
 export function providers() {
-  const wantsOpenai = (process.env.PI_IMAGES || '').toLowerCase() === 'openai';
+  const want = (process.env.PI_IMAGES || '').toLowerCase();
   return {
-    image: wantsOpenai && process.env.OPENAI_API_KEY ? 'openai' : 'mock',
+    image: want === 'codex' ? 'codex' : want === 'openai' && process.env.OPENAI_API_KEY ? 'openai' : 'mock',
+    imageWorkers: imageWorkers.length,
     imageModel: process.env.PI_IMAGE_MODEL || 'gpt-image-1',
     imageCap: Number(process.env.PI_IMAGE_CAP) || 200,
     voice: SAY && FFMPEG ? 'say' : null,
@@ -64,6 +67,55 @@ export async function openaiImages({ prompt, n = 4, shape = 'square', from = nul
   const j = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(`the image model said: ${j.error?.message || res.status}`);
   return (j.data || []).map((d) => Buffer.from(d.b64_json, 'base64'));
+}
+
+// ---------------------------------------------------------------- images: Codex on a ChatGPT subscription
+// One job = n images for one prompt. The server keeps the jobs in memory and long-polls them out to whichever
+// image terminal has waited longest; render() awaits the PNGs. Several people can run a terminal at once.
+const imageJobs = [];      // { id, prompt, n, size, from, resolve, reject, taken, timer }
+const imageWorkers = [];   // { id, res, timer }
+const JOB_MS = 10 * 60 * 1000;
+let imageSeen = 0;
+export const imageTerminalOnline = () => imageWorkers.length > 0 || Date.now() - imageSeen < 3 * 60 * 1000;
+function handOut() {
+  while (imageWorkers.length) {
+    const job = imageJobs.find((j) => !j.taken);
+    if (!job) return;
+    const w = imageWorkers.shift(); clearTimeout(w.timer);
+    job.taken = w.id;
+    const from = job.from && fs.existsSync(job.from) ? { name: path.basename(job.from), b64: fs.readFileSync(job.from).toString('base64') } : null;
+    try { w.res.writeHead(200, { 'content-type': 'application/json', 'cache-control': 'no-store' }); w.res.end(JSON.stringify({ job: { id: job.id, prompt: job.prompt, n: job.n, size: job.size, from } })); }
+    catch { job.taken = null; }
+  }
+}
+export function codexImages({ prompt, n = 4, shape = 'square', from = null }) {
+  if (!imageTerminalOnline()) return Promise.reject(Object.assign(new Error('no image terminal is online: someone runs “npm run images” (Codex on their ChatGPT login)'), { code: 409 }));
+  return new Promise((resolve, reject) => {
+    const job = { id: crypto.randomBytes(6).toString('hex'), prompt, n, size: SIZE[shape] || SIZE.square, from, resolve, reject, taken: null };
+    job.timer = setTimeout(() => { imageJobs.splice(imageJobs.indexOf(job), 1); reject(new Error('the image terminal took too long (10 min)')); }, JOB_MS);
+    imageJobs.push(job);
+    handOut();
+  });
+}
+// GET /api/images/next — an image terminal waiting for work
+export function imageWait(req, res, botId, timeout) {
+  imageSeen = Date.now();
+  for (const o of imageWorkers.filter((x) => x.id === botId)) { imageWorkers.splice(imageWorkers.indexOf(o), 1); clearTimeout(o.timer); try { o.res.end('{"idle":true,"replaced":true}'); } catch {} }
+  const w = { id: botId, res, timer: null };
+  w.timer = setTimeout(() => { const i = imageWorkers.indexOf(w); if (i >= 0) imageWorkers.splice(i, 1); res.end('{"idle":true}'); }, timeout);
+  imageWorkers.push(w);
+  req.on('close', () => { const i = imageWorkers.indexOf(w); if (i >= 0) { imageWorkers.splice(i, 1); clearTimeout(w.timer); } });
+  handOut();
+}
+// POST /api/images/done — { job, images: [b64 png…] } or { job, error }
+export function imageDone(b) {
+  imageSeen = Date.now();
+  const job = imageJobs.find((j) => j.id === b.job);
+  if (!job) return { error: 'no such job (it timed out?)' };
+  imageJobs.splice(imageJobs.indexOf(job), 1); clearTimeout(job.timer);
+  if (b.error || !b.images?.length) job.reject(new Error(`the image terminal said: ${b.error || 'no images'}`));
+  else job.resolve(b.images.map((x) => Buffer.from(x, 'base64')));
+  return { ok: true };
 }
 
 // ---------------------------------------------------------------- voice: this Mac's voices, shaped by the description

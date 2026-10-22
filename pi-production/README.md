@@ -16,7 +16,7 @@ References makes images, voices and clips through providers (`lib/media.mjs`):
 
 | | default | to change it |
 |---|---|---|
-| images | placeholder sketches drawn in code (free) | `PI_IMAGES=openai` + `OPENAI_API_KEY` (model `PI_IMAGE_MODEL`, default gpt-image-1). Billed per image by OpenAI; `PI_IMAGE_CAP` caps a project's images a month (default 200). |
+| images | placeholder sketches drawn in code (free) | `PI_IMAGES=codex` on the server + `npm run images` in a terminal: Codex CLI on that person's ChatGPT subscription, no API key (`npm i -g @openai/codex`, `codex login` once). Each job goes to one image terminal. Or `PI_IMAGES=openai` + `OPENAI_API_KEY` (model `PI_IMAGE_MODEL`, default gpt-image-1). Billed per image by OpenAI; `PI_IMAGE_CAP` caps a project's images a month (default 200). |
 | voice samples | this Mac's own voices (`say` + ffmpeg, free) | none needed; anyone can also upload a sample |
 | motion clips | none yet | upload a clip (mp4, webm, gif) |
 

@@ -10,7 +10,8 @@
     "auto": "node bot/auto.mjs",
     "wait": "node bot/wait.mjs",
     "say": "node bot/say.mjs",
-    "done": "node bot/done.mjs"
+    "done": "node bot/done.mjs",
+    "images": "node bot/images.mjs"
   },
   "engines": {
     "node": ">=22"

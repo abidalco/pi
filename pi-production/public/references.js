@@ -334,7 +334,7 @@
       : batch ? batch.images.map((x) => `<button class="opt" data-act="rx-pick" data-image="${x.id}" data-key="o-${x.id}">${img(x)}<span class="use">Use this</span></button>`).join('')
         : v.images[g.slot] ? `<div class="opt" style="cursor:default" data-key="o-cur">${img(v.images[g.slot])}</div>` : '';
     const isFirst = g.slot === first(r);
-    const prov = st.providers.image === 'mock' ? 'Placeholder sketches: no image model is connected (PI_IMAGES=openai to use one).' : 'Made with OpenAI images.';
+    const prov = st.providers.image === 'mock' ? 'Placeholder sketches: no image model is connected (PI_IMAGES=codex or openai to use one).' : st.providers.image === 'codex' ? (st.providers.imageWorkers ? 'Made with OpenAI images, on a ChatGPT subscription.' : 'No image terminal is online: run “npm run images”.') : 'Made with OpenAI images.';
     return `<aside class="genp ${shape}" data-key="genp">
       <div class="gh"><div class="grow"><div class="gt">${ic('sparkle', 's')} ${esc(label)} · ${esc(r.name)}${v.startScene ? ` · ${esc(v.name)}` : ''}</div><div class="gs">${busy ? 'Making 4 options…' : batch ? (isFirst ? 'Pick one. The rest are made from it.' : 'Pick one.') : 'Say what should change.'}</div></div><button class="icon" data-act="rx-gen-x" title="close">${ic('x')}</button></div>
       <div class="opts"><div class="ogrid">${opts}</div></div>

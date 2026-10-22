@@ -12,6 +12,7 @@ import { setProjectsDir, listProjects, openProject, createProject, deleteProject
 import * as BS from './lib/brainstorm.mjs';
 import * as SC from './lib/script.mjs';
 import * as RF from './lib/references.mjs';
+import * as MEDIA from './lib/media.mjs';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC = path.join(ROOT, 'public');
@@ -187,6 +188,13 @@ const server = http.createServer(async (req, res) => {
     tryDeliver();
     if (botWaiters.includes(w)) changed(); // now online
     return;
+  }
+  if (p === '/api/bot/images/next' && req.method === 'GET') { // the image terminal (bot/images.mjs), Codex on a ChatGPT login
+    return MEDIA.imageWait(req, res, String(url.searchParams.get('bot') || 'images').slice(0, 40), Math.min(Number(url.searchParams.get('timeout')) || 50000, 590000));
+  }
+  if (p === '/api/bot/images/done' && req.method === 'POST') {
+    let b; try { b = JSON.parse((await rawBody(req)).toString()); } catch { return fail(res, 'bad json'); }
+    const out = MEDIA.imageDone(b); changed(); return json(res, out.error ? 404 : 200, out);
   }
   if (p === '/api/bot/context' && req.method === 'GET') {
     try { return json(res, 200, BS.botContext(open(url.searchParams.get('project') || ''), url.searchParams.get('session'))); }

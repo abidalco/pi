@@ -291,7 +291,7 @@ export function publicState(p, { projects = [], botOnline = false } = {}) {
   return {
     refs, people: p.people().map((x) => x.name), started: !!m.mainId,
     scenes: m.order.map((id, i) => ({ id, num: i + 1, title: m.scenes[id]?.title || '' })),
-    providers: { image: prov.image, voice: prov.voice, video: prov.video },
+    providers: { image: prov.image, imageWorkers: prov.imageWorkers, voice: prov.voice, video: prov.video },
     projects: projects.filter((x) => x.id !== p.id).map((x) => ({ id: x.id, name: x.name })),
     config: CONFIG, botOnline,
   };
@@ -388,12 +388,12 @@ async function render(p, r, v, slot, { n = 4, fix = '', opt = null, who = null, 
   const explore = isFirst && !v.start_scene && opt == null;
   const prompt = promptFor(r, v, slot, part, fix);
   let files = [];
-  if (prov.image === 'openai') {
+  if (prov.image === 'openai' || prov.image === 'codex') {
     // from the picked first image (or the Default's, for a variant), so the face or the object stays the same
     const fromRow = !explore ? (pickedOf(p, v.id, FIRST[r.kind]) || pickedOf(p, defaultOf(p, r.id).id, FIRST[r.kind])) : null;
     const from = fromRow && !isFirst ? path.join(dir, fromRow.file) : fromRow && v.start_scene ? path.join(dir, fromRow.file) : null;
-    spend(p, n);
-    const bufs = await MEDIA.openaiImages({ prompt, n, shape: shapeOf(r.kind, slot, part), from });
+    if (prov.image === 'openai') spend(p, n); // codex runs on a subscription: no per-image bill to cap
+    const bufs = await (prov.image === 'codex' ? MEDIA.codexImages : MEDIA.openaiImages)({ prompt, n, shape: shapeOf(r.kind, slot, part), from });
     files = bufs.map((b, i) => { const f = `${fileBase}-${i}.png`; fs.writeFileSync(path.join(dir, f), b); return { file: f, opt: i }; });
   } else {
     const seed = fix ? [...fix].reduce((a, c) => a + c.charCodeAt(0), 0) % 4 : 0;
