@@ -1,0 +1,392 @@
+<title>Brainstorm v2 Mockup</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: the demo's own tokens; session = chat (left) + stage-grouped board (right); "What changed" notes as numbered pins */
+:root {
+  --paper: #f7f6f2; --panel: #ffffff; --ink: #1d1d1b; --mute: #6f6d68; --line: #e2dfd8; --line-2: #cfcbc2;
+  --accent: #245e55; --ok: #2f7d4f; --warn: #b8860b; --bad: #c63f3e; --star: #d9a400;
+  --bot: #eef3f1; --me: #fff4e3; --chip: #ecebe6; --pin: #c2410c; --pin-ink: #ffffff; --on-ink: #ffffff;
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --paper: #161715; --panel: #1f201e; --ink: #ecebe6; --mute: #9d9b95; --line: #2e2f2c; --line-2: #3e3f3b;
+  --accent: #6fb3a6; --ok: #6cbf8a; --warn: #d9a63a; --bad: #e07373; --star: #e6b72a;
+  --bot: #1f2a27; --me: #2e2718; --chip: #2a2b28; --pin: #f08a4b; --pin-ink: #161715; --on-ink: #161715; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --paper: #161715; --panel: #1f201e; --ink: #ecebe6; --mute: #9d9b95; --line: #2e2f2c; --line-2: #3e3f3b;
+  --accent: #6fb3a6; --ok: #6cbf8a; --warn: #d9a63a; --bad: #e07373; --star: #e6b72a;
+  --bot: #1f2a27; --me: #2e2718; --chip: #2a2b28; --pin: #f08a4b; --pin-ink: #161715; --on-ink: #161715; color-scheme: dark }
+* { box-sizing: border-box; }
+body { background: var(--paper); color: var(--ink); font: 15px/1.45 var(--font); }
+button { font: inherit; color: inherit; background: var(--panel); border: 1px solid var(--line-2); border-radius: 8px; padding: 6px 11px; cursor: pointer; }
+button:hover { border-color: var(--ink); }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button.primary { background: var(--ink); color: var(--on-ink); border-color: var(--ink); }
+button.ghost { background: transparent; border-color: transparent; color: var(--mute); padding: 4px 6px; }
+button.ghost:hover { color: var(--ink); }
+.muted { color: var(--mute); } .small { font-size: 13px; }
+
+.demo-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; justify-content: space-between;
+  padding-block: 10px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  background: var(--ink); color: var(--paper); font-size: 13px; }
+.demo-bar b { letter-spacing: .02em; }
+.demo-bar .seg { display: flex; gap: 4px; }
+.demo-bar button { background: transparent; color: var(--paper); border-color: color-mix(in srgb, var(--paper) 35%, transparent); padding: 4px 10px; font-size: 13px; }
+.demo-bar button.on { background: var(--paper); color: var(--ink); border-color: var(--paper); }
+
+.top { display: flex; align-items: center; gap: 12px; padding-block: 12px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  border-bottom: 1px solid var(--line); background: var(--panel); flex-wrap: wrap; }
+.top .brand { font-weight: 700; }
+.top .brand span { font-weight: 400; color: var(--mute); }
+.top .grow { flex: 1; }
+.title-edit { font-weight: 600; font-size: 16px; border: 1px solid transparent; border-radius: 6px; padding: 2px 6px; background: transparent; color: var(--ink); min-width: 0; width: 15em; max-width: 100%; }
+.title-edit:hover { border-color: var(--line-2); }
+.rename-hint { font-size: 13px; color: var(--mute); display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.rename-hint button { padding: 2px 8px; font-size: 13px; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); display: inline-block; }
+
+/* stage bar */
+.stages { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; padding-block: 10px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); background: var(--panel); border-bottom: 1px solid var(--line); }
+.stage { border-radius: 8px; padding: 6px 10px; font-size: 13px; background: var(--chip); display: flex; justify-content: space-between; gap: 6px; min-width: 0; }
+.stage.done { background: color-mix(in srgb, var(--ok) 16%, var(--panel)); }
+.stage.now { background: var(--ink); color: var(--on-ink); }
+.stage span:last-child { opacity: .75; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* session */
+.session { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 420px); min-height: 640px; }
+.chat { display: flex; flex-direction: column; border-right: 1px solid var(--line); min-width: 0; }
+.log { flex: 1; padding: 18px max(16px, env(safe-area-inset-left, 0px)); display: flex; flex-direction: column; gap: 14px; overflow: auto; max-height: 560px; }
+.msg { max-width: 640px; border-radius: 12px; padding: 10px 14px; background: var(--bot); }
+.msg.me { background: var(--me); align-self: flex-end; }
+.msg .who { font-size: 12px; color: var(--mute); margin-bottom: 2px; }
+.sys { font-size: 13px; color: var(--mute); text-align: center; }
+.opts { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
+.opt { text-align: left; font-size: 14px; background: var(--panel); border-radius: 10px; padding: 8px 12px; display: flex; gap: 8px; align-items: baseline; }
+.opt .k { font-size: 12px; color: var(--mute); font-variant-numeric: tabular-nums; }
+.opt.act { border-color: var(--star); }
+.composer { border-top: 1px solid var(--line); padding: 12px max(16px, env(safe-area-inset-right, 0px)) 14px max(16px, env(safe-area-inset-left, 0px)); display: flex; flex-direction: column; gap: 8px; background: var(--panel); }
+.composer .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.composer input { flex: 1; min-width: 0; font: inherit; color: inherit; background: var(--paper); border: 1px solid var(--line-2); border-radius: 8px; padding: 9px 11px; }
+.persona { font-size: 13px; padding: 4px 10px; border-radius: 999px; }
+.tools { position: relative; }
+.menu { position: absolute; bottom: 110%; left: 0; background: var(--panel); border: 1px solid var(--line-2); border-radius: 10px; padding: 6px; display: flex; flex-direction: column; min-width: 220px; z-index: 5; box-shadow: 0 6px 20px color-mix(in srgb, var(--ink) 15%, transparent); }
+.menu button { border: 0; text-align: left; background: transparent; padding: 6px 10px; }
+.menu button:hover { background: var(--chip); }
+.menu hr { border: 0; border-top: 1px solid var(--line); margin: 4px 0; width: 100%; }
+
+/* board */
+.board { background: var(--paper); padding: 14px max(16px, env(safe-area-inset-right, 0px)) 14px 16px; overflow: auto; max-height: 700px; min-width: 0; display: flex; flex-direction: column; gap: 14px; }
+.cand { background: var(--panel); border: 1.5px solid var(--star); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 8px; }
+.cand h4 { margin: 0; font-size: 15px; }
+.cand .label { font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--star); font-weight: 700; }
+.cand p { margin: 0; font-size: 14px; }
+.cand details summary { cursor: pointer; font-size: 13px; color: var(--mute); }
+.cand details p { margin-top: 6px; }
+.cand .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.judge { font-size: 13px; color: var(--ok); }
+.group > button.gh { width: 100%; display: flex; justify-content: space-between; border: 0; background: transparent; padding: 4px 2px; font-size: 12px; letter-spacing: .05em; text-transform: uppercase; color: var(--mute); font-weight: 600; }
+.cards { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 8px; position: relative; }
+.card .t { font-weight: 600; font-size: 14px; }
+.card .b { grid-column: 1 / -1; font-size: 13px; color: var(--mute); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.card .meta { font-size: 12px; color: var(--mute); white-space: nowrap; }
+.card .acts { grid-column: 1 / -1; display: none; gap: 4px; margin-top: 6px; flex-wrap: wrap; }
+.card:hover .acts, .card:focus-within .acts { display: flex; }
+.card .acts button { padding: 2px 8px; font-size: 13px; }
+.card.starred { border-color: var(--star); }
+.card.parked { opacity: .6; }
+
+/* home */
+.home { max-width: 760px; margin: 0 auto; padding-block: 24px 60px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: flex; flex-direction: column; gap: 22px; }
+.home h2 { font-size: 13px; letter-spacing: .06em; text-transform: uppercase; color: var(--mute); margin: 0 0 8px; font-weight: 600; }
+.resume { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 14px; align-items: center; }
+.resume h3 { margin: 0; font-size: 18px; }
+.resume .next { grid-column: 1 / -1; font-size: 14px; background: var(--bot); border-radius: 8px; padding: 8px 10px; }
+.list { display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); }
+.list .it { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 12px; padding: 12px 14px; border-top: 1px solid var(--line); }
+.list .it:first-child { border-top: 0; }
+.list .it .s { font-size: 13px; color: var(--mute); }
+.new { display: flex; gap: 8px; flex-wrap: wrap; }
+.new input { flex: 1; min-width: 0; font: inherit; color: inherit; background: var(--panel); border: 1px solid var(--line-2); border-radius: 8px; padding: 9px 11px; }
+.types { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+.types button { font-size: 13px; border-radius: 999px; padding: 4px 12px; }
+.types button.on { background: var(--ink); color: var(--on-ink); border-color: var(--ink); }
+.promoted { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
+.promoted div { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font-size: 14px; }
+
+/* change pins */
+.pin { display: none; width: 20px; height: 20px; border-radius: 50%; background: var(--pin); color: var(--pin-ink); font-size: 11px; font-weight: 700; align-items: center; justify-content: center; flex: none; vertical-align: middle; cursor: help; }
+body.notes .pin { display: inline-flex; }
+.notes-panel { display: none; background: var(--panel); border-bottom: 1px solid var(--line); padding-block: 14px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+body.notes .notes-panel { display: block; }
+.notes-panel ol { margin: 0; padding-left: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px 20px; font-size: 14px; }
+.notes-panel li { display: flex; gap: 8px; align-items: baseline; }
+.notes-panel li .pin { display: inline-flex; }
+.notes-panel b { display: block; }
+
+.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--on-ink); padding: 10px 16px; border-radius: 10px; font-size: 14px; z-index: 10; max-width: calc(100% - 32px); }
+
+@media (max-width: 860px) {
+  .session { grid-template-columns: minmax(0, 1fr); }
+  .chat { border-right: 0; border-bottom: 1px solid var(--line); }
+  .board { max-height: none; }
+  .stages { grid-template-columns: repeat(2, 1fr); }
+}
+@media (prefers-reduced-motion: no-preference) { .card, .opt { transition: border-color .15s; } }
+</style>
+
+<div class="demo-bar">
+  <b>Brainstorm v2 · mockup</b>
+  <div class="seg" role="group" aria-label="Screen">
+    <button id="tab-session" class="on" type="button">Session</button>
+    <button id="tab-home" type="button">Home</button>
+  </div>
+  <button id="toggle-notes" type="button" aria-pressed="true">● What changed</button>
+</div>
+
+<div class="notes-panel" id="notes">
+  <ol id="notes-list"></ol>
+</div>
+
+<!-- SESSION -->
+<section id="screen-session">
+  <div class="top">
+    <span class="brand">π <span>Brainstorm</span></span>
+    <button class="ghost" type="button" data-go="home">← sessions</button>
+    <input class="title-edit" id="title" value="war in the middle east" aria-label="Session title">
+    <span class="pin">1</span>
+    <span class="rename-hint" id="rename-hint">The story moved on. Rename to <b>The Karaoke Will</b>? <button type="button" id="rename-yes">Rename</button></span>
+    <span class="grow"></span>
+    <span class="small muted"><span class="dot"></span> bot online · just you</span>
+    <button class="ghost" type="button" title="Guide, export, reset">⋯</button>
+  </div>
+  <div class="stages" aria-label="Stages">
+    <div class="stage done"><span>🌱 Spark</span><span>6 cards</span></div>
+    <div class="stage done"><span>🌿 Shape</span><span>4 cards</span></div>
+    <div class="stage done"><span>🌳 Build</span><span>5 cards</span></div>
+    <div class="stage now"><span>🎬 Pitch <span class="pin">2</span></span><span>3 cards</span></div>
+  </div>
+
+  <div class="session">
+    <div class="chat">
+      <div class="log" id="log">
+        <div class="sys">🤖 moved to 🎬 Pitch</div>
+        <div class="msg"><div class="who">🎩 Director</div>
+          Fixed. One chain, no magic: in the hearing they play track 7 to prove what the machine is worth. The court hears a famous hit in Dad's voice, recorded <b>two years before it was released</b>. The machine is the evidence. Sell it and the claim dies.
+          <div class="opts"><span class="pin">3</span>
+            <button class="opt" type="button" data-say="who stole the song, exactly?"><span class="k">1</span>who stole the song, exactly? Dad's old bandmate, or the label?</button>
+            <button class="opt" type="button" data-say="big brother needs a want of his own"><span class="k">2</span>big brother needs a want of his own, not just "keep the machine"</button>
+            <button class="opt act" type="button" id="star-opt"><span class="k">3</span>⭐ Mark the Pitch card as the candidate</button>
+          </div>
+        </div>
+      </div>
+      <div class="composer">
+        <div class="row">
+          <input id="say" placeholder="Answer, or type keywords…" aria-label="Message">
+          <button class="primary" type="button" id="send">Send</button>
+        </div>
+        <div class="row small">
+          <div class="tools">
+            <button class="ghost" type="button" id="tools-btn" aria-expanded="false">✨ Mini-round ▾</button>
+            <div class="menu" id="tools-menu" hidden>
+              <button type="button" data-mini="🎲 Wildcard">🎲 Wildcard</button>
+              <button type="button" data-mini="🔄 Flip it">🔄 Flip the last card</button>
+              <button type="button" data-mini="➕ Yes, and…">➕ Yes, and… the last card</button>
+              <button type="button" data-mini="💀 Worst idea">💀 Worst idea round</button>
+            </div>
+          </div>
+          <span class="pin">4</span>
+          <span class="grow" style="flex:1"></span>
+          <button class="persona" type="button" id="persona" title="Change the bot's personality">🎩 Director ▾</button>
+        </div>
+      </div>
+    </div>
+
+    <aside class="board" aria-label="Board">
+      <div class="cand" id="cand">
+        <div class="row"><span class="label" id="cand-label">Pitch · ready to star</span><span class="pin">5</span></div>
+        <h4>The Karaoke Will</h4>
+        <p>A broke younger brother inherits nothing but his father's karaoke machine and his debts, until the machine turns out to hold proof that Dad wrote a famous hit. The only way to get paid is to sue alongside the older brother he left behind.</p>
+        <details><summary>Synopsis, tone, themes</summary>
+          <p>Cornered by a debt collector, he gets the call: Dad is dead, the will is ready. The vault holds one thing, the karaoke machine. It goes to court as a custody hearing. Track 7 proves authorship; the brothers need both halves of the evidence, sue together, and the royalties clear the debt.</p>
+          <p class="small muted">Tone: bittersweet · loud · Themes: inheritance is debt · you become your father</p>
+        </details>
+        <div class="row" id="cand-actions">
+          <button class="primary" type="button" id="star-btn">⭐ Star</button>
+          <button class="ghost" type="button">Edit</button>
+          <button class="ghost" type="button">⋯</button>
+        </div>
+      </div>
+
+      <div class="group" data-g="pitch">
+        <button class="gh" type="button"><span>🎬 Pitch · 3 <span class="pin">6</span></span><span>▾</span></button>
+        <div class="cards">
+          <div class="card" tabindex="0"><span class="t">Logic: the machine is the evidence</span><span class="meta">🤖 · 🔥1</span><span class="b">Track 7 predates the hit's release by two years. Selling the machine kills the claim.</span><div class="acts"><button type="button">👍</button><button type="button">🔥</button><button type="button">⭐</button><button type="button">Park</button><button type="button">⋯</button></div></div>
+          <div class="card" tabindex="0"><span class="t">Fix: track 7 royalties</span><span class="meta">🤖</span><span class="b">Track 7 is Dad's own song, used by someone else for years. The brothers sue and get paid.</span><div class="acts"><button type="button">👍</button><button type="button">🔥</button><button type="button">⭐</button><button type="button">Park</button><button type="button">⋯</button></div></div>
+          <div class="card" tabindex="0"><span class="t">Note: paying with a song is illogical</span><span class="meta">abidalco</span><span class="b">The ending needs a real mechanism, not a metaphor.</span><div class="acts"><button type="button">👍</button><button type="button">🔥</button><button type="button">⭐</button><button type="button">Park</button><button type="button">⋯</button></div></div>
+        </div>
+      </div>
+      <div class="group" data-g="build">
+        <button class="gh" type="button"><span>🌳 Build · 5</span><span>▸</span></button>
+        <div class="cards" hidden>
+          <div class="card" tabindex="0"><span class="t">Open: the debt collector</span><span class="meta">🤖</span><span class="b">He needs money now. Then the call about Dad's will comes.</span><div class="acts"><button type="button">👍</button><button type="button">🔥</button><button type="button">⭐</button><button type="button">Park</button><button type="button">⋯</button></div></div>
+          <div class="card" tabindex="0"><span class="t">Tone: bittersweet · loud</span><span class="meta">abidalco</span><span class="b">Grief played at full volume.</span><div class="acts"><button type="button">👍</button><button type="button">🔥</button><button type="button">⭐</button><button type="button">Park</button><button type="button">⋯</button></div></div>
+          <div class="card" tabindex="0"><span class="t">Not obvious: Dad was in debt too</span><span class="meta">abidalco</span><span class="b">The younger brother is repeating his father's life.</span><div class="acts"><button type="button">👍</button><button type="button">🔥</button><button type="button">⭐</button><button type="button">Park</button><button type="button">⋯</button></div></div>
+        </div>
+      </div>
+      <div class="group" data-g="shape">
+        <button class="gh" type="button"><span>🌿 Shape · 4</span><span>▸</span></button>
+        <div class="cards" hidden>
+          <div class="card" tabindex="0"><span class="t">Hero: the younger brother</span><span class="meta">abidalco</span><span class="b">Left, came back for the will.</span><div class="acts"><button type="button">👍</button><button type="button">🔥</button><button type="button">⭐</button><button type="button">Park</button><button type="button">⋯</button></div></div>
+          <div class="card" tabindex="0"><span class="t">Want vs. obstacle</span><span class="meta">abidalco</span><span class="b">Wants to sell it and pay a debt; big brother won't let go.</span><div class="acts"><button type="button">👍</button><button type="button">🔥</button><button type="button">⭐</button><button type="button">Park</button><button type="button">⋯</button></div></div>
+        </div>
+      </div>
+      <div class="group" data-g="spark">
+        <button class="gh" type="button"><span>🌱 Spark · 6</span><span>▸</span></button>
+        <div class="cards" hidden>
+          <div class="card" tabindex="0"><span class="t">Seed: two brothers, one inheritance</span><span class="meta">abidalco</span><span class="b">Cain and Abel with a lawyer present.</span><div class="acts"><button type="button">👍</button><button type="button">🔥</button><button type="button">⭐</button><button type="button">Park</button><button type="button">⋯</button></div></div>
+          <div class="card" tabindex="0"><span class="t">Wildcard: the karaoke machine</span><span class="meta">🤖</span><span class="b">It's the only thing Dad actually left.</span><div class="acts"><button type="button">👍</button><button type="button">🔥</button><button type="button">⭐</button><button type="button">Park</button><button type="button">⋯</button></div></div>
+        </div>
+      </div>
+      <div class="group" data-g="parked">
+        <button class="gh" type="button"><span>🅿 Parked from the first idea · 4 <span class="pin">7</span></span><span>▸</span></button>
+        <div class="cards" hidden>
+          <div class="card parked" tabindex="0"><span class="t">Comedy about the occupation</span><span class="meta">🤖</span><span class="b">Parked when you said "start fresh". Bring it back any time.</span><div class="acts"><button type="button">Bring back</button><button type="button">Discard</button></div></div>
+          <div class="card parked" tabindex="0"><span class="t">Wall · football · wrong side</span><span class="meta">abidalco</span><span class="b">A ball kicked over the separation wall.</span><div class="acts"><button type="button">Bring back</button><button type="button">Discard</button></div></div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<!-- HOME -->
+<section id="screen-home" hidden>
+  <div class="top">
+    <span class="brand">π <span>Brainstorm</span></span>
+    <span class="grow"></span>
+    <span class="small muted"><span class="dot"></span> bot online</span>
+    <span class="small">you are <b>abidalco</b></span>
+    <button class="ghost" type="button">⋯</button>
+  </div>
+  <div class="home">
+    <div>
+      <h2>Pick up where you left off <span class="pin">8</span></h2>
+      <div class="resume">
+        <div><h3>The Karaoke Will</h3><span class="small muted">💡 Idea · 🎬 Pitch · 18 cards · 1 candidate · 2 min ago</span></div>
+        <button class="primary" type="button" data-go="session">Continue</button>
+        <div class="next">Next: star the Pitch card, then send it to Script.</div>
+      </div>
+    </div>
+    <div>
+      <h2>Start something <span class="pin">9</span></h2>
+      <div class="new">
+        <input placeholder="A title, a few keywords, or paste what you already have" aria-label="New session topic">
+        <button class="primary" type="button">Start</button>
+      </div>
+      <div class="types" role="group" aria-label="Session type">
+        <button class="on" type="button" title="Spark → Shape → Build → Pitch">💡 Idea</button>
+        <button type="button" title="Premise → Spine → Character arcs → Rules → Lock">🧭 Arc</button>
+        <button type="button" title="Sketch → Want / Fear → Voice → Profile">🧑 Character</button>
+        <button type="button" title="Moment → Stakes → Beats → Scene card">🎬 Scene</button>
+        <button type="button" title="Situation → Subtext → Lines → Polish">💬 Dialogue</button>
+      </div>
+      <p class="small muted" style="margin:8px 0 0">💡 Idea: keywords or a messy thought → a pitch, which becomes a new Script. Teammates can join any time from the link.</p>
+    </div>
+    <div>
+      <h2>Other sessions</h2>
+      <div class="list">
+        <div class="it"><b>Older brother</b><span class="s">yesterday</span><span class="s">🧑 Character · 🪪 Profile · 11 cards</span></div>
+        <div class="it"><b>Morning coffee debate</b><span class="s">yesterday</span><span class="s">🎬 Scene · 🥁 Beats · 9 cards</span></div>
+      </div>
+    </div>
+    <div>
+      <h2>Sent to Script <span class="pin">10</span></h2>
+      <div class="promoted" id="promoted"><div class="muted small">Nothing yet. A starred card you send to Script shows up here.</div></div>
+    </div>
+  </div>
+</section>
+
+<script>
+const NOTES = [
+  ["Title follows the story", "The session pivoted from \"war in the middle east\" to a karaoke inheritance story, but the old title stayed. The title is editable in place, and the bot offers a rename when the topic changes."],
+  ["Stage bar shows progress", "Each stage shows its card count and done/now state, so you see where you are without reading the chat."],
+  ["Quick replies do the thing", "Options show their full text (no cut-off chips) and are numbered so 1–3 work as keys. An option like ⭐ actually stars the card; today the bot has to tell you to go tap it."],
+  ["Mini-rounds behind one menu", "Wildcard, flip, yes-and and worst idea move from every card into one menu by the composer. Personality is a small chip, not a top-bar dropdown."],
+  ["One output, one obvious button", "The candidate is pinned at the top of the board with one main action. Solo: the Judge checks and it goes straight to Script. A team vote only appears when 2+ people are in."],
+  ["Quiet cards, grouped by stage", "Cards show a title and two lines. Reactions and actions appear on hover instead of 11 buttons on every card. Older stages fold away."],
+  ["\"Start fresh\" really clears the board", "Cards from an abandoned idea are parked together in one folded group instead of mixing with the new story."],
+  ["Home opens on your last session", "One Continue button with the next step, instead of a type picker first and a list of identical \"live\" pills."],
+  ["One field to start", "Topic and pasted notes share one field; type is a row of chips with the stages as tooltip. No lobby step: teammates join from the link."],
+  ["Sent to Script, by name", "Promoted output is listed by title and links to the Script demo."]
+];
+const $ = s => document.querySelector(s);
+const list = $('#notes-list');
+NOTES.forEach(([t, d], i) => { const li = document.createElement('li'); li.innerHTML = `<span class="pin">${i+1}</span><span><b>${t}</b><span class="muted">${d}</span></span>`; list.append(li); });
+document.querySelectorAll('.pin').forEach(p => { const n = NOTES[+p.textContent - 1]; if (n && !p.closest('li')) p.title = n[0] + ': ' + n[1]; });
+
+document.body.classList.add('notes');
+$('#toggle-notes').onclick = e => { const on = document.body.classList.toggle('notes'); e.currentTarget.setAttribute('aria-pressed', on); };
+
+function show(which) {
+  $('#screen-session').hidden = which !== 'session';
+  $('#screen-home').hidden = which !== 'home';
+  $('#tab-session').classList.toggle('on', which === 'session');
+  $('#tab-home').classList.toggle('on', which === 'home');
+  window.scrollTo(0, 0);
+}
+$('#tab-session').onclick = () => show('session');
+$('#tab-home').onclick = () => show('home');
+document.querySelectorAll('[data-go]').forEach(b => b.onclick = () => show(b.dataset.go));
+
+let toastT;
+function toast(msg) { let t = $('.toast'); if (!t) { t = document.createElement('div'); t.className = 'toast'; t.setAttribute('role', 'status'); document.body.append(t); } t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => t.hidden = true, 2600); }
+
+$('#rename-yes').onclick = () => { $('#title').value = 'The Karaoke Will'; $('#rename-hint').hidden = true; toast('Renamed to The Karaoke Will'); };
+
+const log = $('#log');
+function add(html, cls = 'msg') { const d = document.createElement('div'); d.className = cls; d.innerHTML = html; log.append(d); log.scrollTop = log.scrollHeight; }
+function say(text) { add(`<div class="who">abidalco</div>${text.replace(/</g,'&lt;')}`, 'msg me'); }
+
+let starred = false;
+function star() {
+  if (starred) return; starred = true;
+  $('#cand').querySelector('.label').textContent = 'Pitch · ⭐ starred · Judge ✅ no conflicts';
+  $('#cand-actions').innerHTML = '<button class="primary" type="button" id="send-script">Send to Script →</button><button class="ghost" type="button" id="unstar">Unstar</button>';
+  $('#send-script').onclick = sendScript;
+  $('#unstar').onclick = () => location.reload();
+  add('⭐ abidalco starred <b>The Karaoke Will</b> · ⚖️ Judge: no conflicts', 'sys');
+}
+function sendScript() {
+  $('#cand-actions').innerHTML = '<span class="judge">✓ Sent to Script as a new draft skeleton</span>';
+  $('#promoted').innerHTML = '<div><b>The Karaoke Will</b><br><span class="small muted">💡 Idea → Script · new skeleton</span></div>';
+  add('📤 Sent to Script. The bot is building the scene skeleton there.', 'sys');
+  toast('Sent to Script');
+}
+$('#star-opt').onclick = () => { say('⭐ Mark the Pitch card as the candidate'); star(); };
+$('#star-btn').onclick = star;
+document.querySelectorAll('.opt[data-say]').forEach(b => b.onclick = () => say(b.dataset.say));
+document.addEventListener('keydown', e => {
+  if (document.activeElement.tagName === 'INPUT') return;
+  const o = document.querySelectorAll('.opts .opt')[+e.key - 1]; if (o && !$('#screen-session').hidden) o.click();
+});
+function send() { const v = $('#say').value.trim(); if (!v) return; say(v); $('#say').value = ''; }
+$('#send').onclick = send;
+$('#say').onkeydown = e => { if (e.key === 'Enter') send(); };
+
+const tb = $('#tools-btn'), tm = $('#tools-menu');
+tb.onclick = () => { tm.hidden = !tm.hidden; tb.setAttribute('aria-expanded', !tm.hidden); };
+tm.querySelectorAll('button').forEach(b => b.onclick = () => { tm.hidden = true; add(`abidalco called ${b.dataset.mini}`, 'sys'); });
+document.addEventListener('click', e => { if (!e.target.closest('.tools')) tm.hidden = true; });
+
+const P = ['🎩 Director', '🃏 Trickster', '🧠 Script Doctor', '🎭 Drama Coach']; let pi = 0;
+$('#persona').onclick = e => { pi = (pi + 1) % P.length; e.currentTarget.textContent = P[pi] + ' ▾'; add(`switched the bot to ${P[pi]}`, 'sys'); };
+
+document.querySelectorAll('.group > .gh').forEach(h => h.onclick = () => { const c = h.nextElementSibling; c.hidden = !c.hidden; h.lastElementChild.textContent = c.hidden ? '▸' : '▾'; });
+document.querySelectorAll('.card .acts button').forEach(b => b.onclick = e => {
+  const card = b.closest('.card'), k = b.textContent;
+  if (k === '⭐') card.classList.toggle('starred');
+  else if (k === 'Park' || k === 'Discard') card.classList.add('parked');
+  else if (k === 'Bring back') card.classList.remove('parked');
+  else if (k === '👍' || k === '🔥') toast(k + ' added');
+});
+</script>

@@ -1,0 +1,529 @@
+<title>References Mockup</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: same tokens as the Brainstorm mockup; gallery of cards → detail page (sections left, Generate panel right) */
+:root {
+  --paper: #f7f6f2; --panel: #ffffff; --ink: #1d1d1b; --mute: #6f6d68; --line: #e2dfd8; --line-2: #cfcbc2;
+  --accent: #245e55; --ok: #2f7d4f; --warn: #b8860b; --bad: #c63f3e; --info: #3a5f9e;
+  --chip: #ecebe6; --soft: #eef3f1; --on-ink: #ffffff;
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --paper: #161715; --panel: #1f201e; --ink: #ecebe6; --mute: #9d9b95; --line: #2e2f2c; --line-2: #3e3f3b;
+  --accent: #6fb3a6; --ok: #6cbf8a; --warn: #d9a63a; --bad: #e07373; --info: #8aa9e0;
+  --chip: #2a2b28; --soft: #1f2a27; --on-ink: #161715; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --paper: #161715; --panel: #1f201e; --ink: #ecebe6; --mute: #9d9b95; --line: #2e2f2c; --line-2: #3e3f3b;
+  --accent: #6fb3a6; --ok: #6cbf8a; --warn: #d9a63a; --bad: #e07373; --info: #8aa9e0;
+  --chip: #2a2b28; --soft: #1f2a27; --on-ink: #161715; color-scheme: dark }
+* { box-sizing: border-box; }
+body { background: var(--paper); color: var(--ink); font: 15px/1.45 var(--font); }
+button { font: inherit; color: inherit; background: var(--panel); border: 1px solid var(--line-2); border-radius: 8px; padding: 6px 11px; cursor: pointer; }
+button:hover:not(:disabled) { border-color: var(--ink); }
+button:disabled { opacity: .45; cursor: default; }
+button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button.primary { background: var(--ink); color: var(--on-ink); border-color: var(--ink); }
+button.ghost { background: transparent; border-color: transparent; color: var(--mute); padding: 4px 6px; }
+button.ghost:hover { color: var(--ink); }
+button.sm { font-size: 13px; padding: 3px 9px; }
+input, textarea, select { font: inherit; color: inherit; background: var(--panel); border: 1px solid var(--line-2); border-radius: 8px; padding: 7px 10px; width: 100%; }
+textarea { resize: vertical; min-height: 70px; }
+.muted { color: var(--mute); } .small { font-size: 13px; }
+h2 { font-size: 13px; letter-spacing: .06em; text-transform: uppercase; color: var(--mute); margin: 0; font-weight: 600; }
+
+.wrap { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.demo-bar { background: var(--ink); color: var(--paper); font-size: 13px; padding-block: 10px; display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; }
+.demo-bar b { letter-spacing: .02em; }
+.demo-bar .seg { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; }
+.demo-bar button { background: transparent; color: var(--paper); border-color: color-mix(in srgb, var(--paper) 35%, transparent); padding: 3px 9px; font-size: 13px; }
+.demo-bar button.on { background: var(--paper); color: var(--ink); border-color: var(--paper); }
+.top { display: flex; align-items: center; gap: 12px; padding-block: 12px; border-bottom: 1px solid var(--line); background: var(--panel); flex-wrap: wrap; }
+.top .brand { font-weight: 700; } .top .brand span { font-weight: 400; color: var(--mute); }
+.nav { display: flex; gap: 4px; margin-left: auto; flex-wrap: wrap; }
+.nav span { font-size: 13px; padding: 3px 9px; border-radius: 999px; color: var(--mute); }
+.nav span.on { background: var(--ink); color: var(--on-ink); }
+main { padding-block: 18px 60px; max-width: 1240px; margin: 0 auto; }
+
+.pill { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--line-2); color: var(--mute); background: var(--panel); white-space: nowrap; }
+.pill.draft { color: var(--mute); }
+.pill.awaiting { color: var(--info); border-color: var(--info); }
+.pill.generating { color: var(--accent); border-color: var(--accent); }
+.pill.review { color: var(--warn); border-color: var(--warn); }
+.pill.approved { color: var(--ok); border-color: var(--ok); }
+.pill.stale { color: var(--bad); border-color: var(--bad); }
+.pill.unused { border-style: dashed; }
+.pill.ai { color: var(--accent); border-style: dashed; border-color: var(--accent); }
+
+.tabs { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.tabs button.on { background: var(--ink); color: var(--on-ink); border-color: var(--ink); }
+.tabs .spacer { flex: 1; }
+.addform { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; padding: 12px; border: 1px dashed var(--line-2); border-radius: 10px; background: var(--panel); }
+.addform input { flex: 1 1 200px; width: auto; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; margin-top: 16px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; cursor: pointer; text-align: left; padding: 0; display: flex; flex-direction: column; }
+.card:hover { border-color: var(--ink); }
+.card .thumb { position: relative; overflow: hidden; aspect-ratio: 4/3; background: var(--chip); display: grid; place-items: center; color: var(--mute); font-size: 13px; max-width: 100%; }
+.card .thumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top; }
+.card .body { padding: 10px 12px 12px; display: flex; flex-direction: column; gap: 6px; }
+.card .name { font-weight: 600; }
+.badges { display: flex; flex-wrap: wrap; gap: 4px; }
+
+.projects { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; margin-top: 14px; }
+.projects .card .thumb { aspect-ratio: 16/9; }
+.home-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.home-head h1 { font-size: 22px; margin: 0; }
+.home-head button { margin-left: auto; }
+.crumb { display: flex; gap: 6px; align-items: center; }
+.events { margin-top: 26px; padding: 14px; border-radius: 10px; background: var(--soft); display: flex; flex-direction: column; gap: 10px; }
+.events .row { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.detail { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 18px; align-items: start; margin-top: 14px; }
+@media (max-width: 880px) { .detail { grid-template-columns: 1fr; } }
+.sec { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.stack { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.head { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.head h1 { font-size: 22px; margin: 0; text-wrap: balance; }
+.head .owner { margin-left: auto; display: flex; gap: 6px; align-items: center; font-size: 13px; }
+.head .owner select { width: auto; padding: 4px 8px; }
+.slots { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; }
+.slot { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--mute); }
+.slot .img { position: relative; aspect-ratio: 3/4; border-radius: 8px; background: var(--chip); border: 1px dashed var(--line-2); display: grid; place-items: center; overflow: hidden; max-width: 100%; }
+.slot.wide .img { aspect-ratio: 4/3; }
+.slot .img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.slot.target .img { outline: 2px solid var(--accent); outline-offset: 2px; }
+.slot button { font-size: 12px; padding: 2px 6px; }
+.fields { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px 12px; }
+.fields label { display: flex; flex-direction: column; gap: 3px; font-size: 12px; color: var(--mute); }
+.rowline { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding: 8px 0; border-top: 1px solid var(--line); }
+.rowline:first-of-type { border-top: 0; }
+.rowline .grow { flex: 1 1 180px; min-width: 0; }
+.rowline img { width: 46px; height: 60px; object-fit: cover; border-radius: 6px; background: var(--chip); }
+.rowline input.sc { width: 64px; }
+.note { font-size: 12px; color: var(--mute); }
+
+.gen { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); }
+.opts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.opt { position: relative; padding: 0; border-radius: 8px; overflow: hidden; aspect-ratio: 3/4; max-width: 100%; }
+.opt.wide { aspect-ratio: 4/3; }
+.opt img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.spin { padding: 30px 0; text-align: center; color: var(--mute); font-size: 13px; }
+.spin::before { content: ""; display: block; width: 22px; height: 22px; margin: 0 auto 8px; border-radius: 50%; border: 3px solid var(--line-2); border-top-color: var(--accent); animation: r 0.8s linear infinite; }
+@keyframes r { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .spin::before { animation: none; } }
+.lock { font-size: 13px; color: var(--mute); padding: 8px 10px; border-radius: 8px; background: var(--chip); }
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(env(safe-area-inset-bottom, 0px) + 16px); background: var(--ink); color: var(--on-ink); padding: 8px 14px; border-radius: 8px; font-size: 13px; max-width: calc(100% - 32px); }
+</style>
+
+<div class="demo-bar wrap">
+  <b>MOCKUP · Section 3 References</b>
+  <div class="seg">Testing only · view as:
+    <button data-act="me" data-v="Abdallah">Abdallah</button>
+    <button data-act="me" data-v="Hadi">Hadi</button>
+  </div>
+  <span style="opacity:.7">Generation is simulated (no real OpenAI call). Sample data.</span>
+</div>
+<div class="top wrap" id="top"></div>
+<main class="wrap" id="app"></main>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+const EXPR_DEFAULT = ['Neutral','Happy','Angry','Sad','Scared','Surprised'];
+const TYPES = { character: '🧑 Characters', location: '📍 Locations', prop: '🔑 Props' };
+const STATUS = { draft: '✏️ Draft', awaiting: '⏳ Awaiting generation', generating: '⚙️ Generating', review: '👀 Review', approved: '✅ Approved' };
+
+/* ---------- placeholder art (stands in for OpenAI images) ---------- */
+const uri = (w, h, body, bg) => 'data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}"><rect width="${w}" height="${h}" fill="${bg}"/>${body}</svg>`);
+const tag = (w, h, t) => `<text x="${w/2}" y="${h-6}" font-family="sans-serif" font-size="9" text-anchor="middle" fill="#00000088">${t}</text>`;
+function mouth(e, cx, y, s) {
+  const m = { Happy: `M${cx-8*s} ${y} Q${cx} ${y+8*s} ${cx+8*s} ${y}`, Sad: `M${cx-8*s} ${y+5*s} Q${cx} ${y-3*s} ${cx+8*s} ${y+5*s}`,
+    Angry: `M${cx-7*s} ${y+2*s} L${cx+7*s} ${y+2*s}`, Smirk: `M${cx-6*s} ${y+2*s} Q${cx+3*s} ${y+4*s} ${cx+8*s} ${y-2*s}` };
+  if (e === 'Scared') return `<ellipse cx="${cx}" cy="${y+2*s}" rx="${4*s}" ry="${3*s}" fill="#5a2a2a"/>`;
+  if (e === 'Surprised') return `<ellipse cx="${cx}" cy="${y+3*s}" rx="${5*s}" ry="${6*s}" fill="#5a2a2a"/>`;
+  return `<path d="${m[e] || `M${cx-7*s} ${y+2*s} L${cx+7*s} ${y+2*s}`}" stroke="#5a2a2a" stroke-width="${2*s}" fill="none" stroke-linecap="round"/>`;
+}
+function brows(e, cx, y, s) {
+  const d = e === 'Angry' ? [2, -2] : (e === 'Scared' || e === 'Surprised' || e === 'Sad') ? [-2, 2] : [0, 0];
+  return `<path d="M${cx-12*s} ${y+d[0]*s} L${cx-4*s} ${y+d[1]*s} M${cx+4*s} ${y+d[1]*s} L${cx+12*s} ${y+d[0]*s}" stroke="#3a2a20" stroke-width="${1.6*s}" stroke-linecap="round"/>`;
+}
+function hairPath(style, cx, cy, r) {
+  if (style === 0) return `<path d="M${cx-r} ${cy} Q${cx} ${cy-r*1.7} ${cx+r} ${cy} Q${cx+r*.8} ${cy-r*.9} ${cx} ${cy-r*.95} Q${cx-r*.8} ${cy-r*.9} ${cx-r} ${cy}Z"/>`;
+  if (style === 1) return `<path d="M${cx-r*1.05} ${cy+r*1.2} L${cx-r*1.05} ${cy-r*.2} Q${cx} ${cy-r*1.7} ${cx+r*1.05} ${cy-r*.2} L${cx+r*1.05} ${cy+r*1.2} L${cx+r*.75} ${cy+r*1.2} L${cx+r*.75} ${cy-r*.3} Q${cx} ${cy-r*.8} ${cx-r*.75} ${cy-r*.3} L${cx-r*.75} ${cy+r*1.2}Z"/>`;
+  return `<path d="M${cx-r} ${cy-r*.1} Q${cx-r*.6} ${cy-r*1.5} ${cx+r*.3} ${cy-r*1.2} Q${cx+r*1.2} ${cy-r*1.1} ${cx+r} ${cy-r*.1} Q${cx} ${cy-r*.75} ${cx-r} ${cy-r*.1}Z"/>`;
+}
+function charArt(p, view, seed, o = {}) {
+  const hue = (p.hue + (seed * 23) % 40 - 20 + 360) % 360, style = (p.style + seed) % 3;
+  const hair = `hsl(${(p.hairHue||25)} 45% ${p.hairL||25}%)`, skin = p.skin || '#e9c4a0', bg = `hsl(${hue} 30% 92%)`;
+  if (view === 'expr') {
+    const cx = 60, cy = 62, r = 36, s = 1.6;
+    return uri(120, 130, `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${skin}"/><g fill="${hair}">${hairPath(style, cx, cy, r)}</g>${brows(o.expr, cx, cy-8, s)}<circle cx="${cx-10}" cy="${cy+2}" r="3" fill="#2b2b2b"/><circle cx="${cx+10}" cy="${cy+2}" r="3" fill="#2b2b2b"/>${mouth(o.expr, cx, cy+16, s)}${o.scar ? `<path d="M${cx-24} ${cy+4} L${cx-14} ${cy+16}" stroke="#b33" stroke-width="2"/>` : ''}${tag(120, 130, o.expr)}`, bg);
+  }
+  const torso = `<rect x="36" y="82" width="48" height="62" rx="14" fill="hsl(${hue} 45% 45%)"/>`;
+  let head;
+  if (view === 'side') head = `<circle cx="58" cy="56" r="21" fill="${skin}"/><path d="M78 54 L85 60 L78 62Z" fill="${skin}"/><g fill="${hair}" transform="translate(-6 0)">${hairPath(style, 58, 56, 21)}</g><circle cx="70" cy="54" r="2" fill="#2b2b2b"/>`;
+  else if (view === 'back') head = `<circle cx="60" cy="56" r="21" fill="${hair}"/>`;
+  else head = `<circle cx="60" cy="56" r="21" fill="${skin}"/><g fill="${hair}">${hairPath(style, 60, 56, 21)}</g><circle cx="53" cy="56" r="2" fill="#2b2b2b"/><circle cx="67" cy="56" r="2" fill="#2b2b2b"/>${mouth('Neutral', 60, 63, .8)}${o.scar ? '<path d="M46 58 L51 66" stroke="#b33" stroke-width="1.6"/>' : ''}`;
+  return uri(120, 160, torso + head + tag(120, 160, view), bg);
+}
+function locArt(p, view, seed) {
+  const h = (p.hue + seed * 17) % 360, bg = `hsl(${h} 25% 90%)`;
+  if (view === 'Layout') {
+    const rooms = (p.areas || []).map((a, i, all) => { const w = 150 / all.length; return `<rect x="${5 + i*w}" y="18" width="${w-4}" height="82" fill="hsl(${h} 30% ${78 - i*6}%)" stroke="#555" stroke-width="1"/><text x="${5 + i*w + (w-4)/2}" y="62" font-family="sans-serif" font-size="8" text-anchor="middle" fill="#333">${a.n}</text>`; }).join('');
+    return uri(160, 120, rooms + `<rect x="${20 + seed*8}" y="16" width="16" height="4" fill="#6aa0d8"/>` + tag(160, 120, 'layout · top view'), bg);
+  }
+  const wx = 20 + (seed * 31) % 90, f = [...view].reduce((a, c) => a + c.charCodeAt(0), 0);
+  return uri(160, 120, `<rect y="0" width="160" height="80" fill="hsl(${h} 25% 82%)"/><rect y="80" width="160" height="40" fill="hsl(${h} 20% 62%)"/><rect x="${wx}" y="18" width="34" height="30" fill="#a9cdea" stroke="#fff" stroke-width="3"/><rect x="${10 + f % 70}" y="${62 - f % 12}" width="${44 + f % 30}" height="${22 + f % 12}" rx="3" fill="hsl(${(h + 40) % 360} 30% 45%)"/>` + tag(160, 120, view), bg);
+}
+function propArt(p, view, seed, o = {}) {
+  const bg = `hsl(${(p.hue + seed * 19) % 360} 25% 92%)`, metal = `hsl(${45 + seed * 6} 55% 50%)`;
+  if (view === 'scale') return uri(120, 160, `<circle cx="45" cy="34" r="14" fill="#bbb"/><rect x="31" y="50" width="28" height="80" rx="10" fill="#bbb"/><g transform="translate(78 108) scale(.35)"><circle cx="0" cy="0" r="14" fill="none" stroke="${metal}" stroke-width="6"/><rect x="12" y="-3" width="40" height="6" fill="${metal}"/></g><path d="M20 140 L100 140" stroke="#999"/>` + tag(120, 160, 'scale vs person'), bg);
+  const rot = { front: 0, side: 90, back: 180, top: 45 }[view] ?? 0, broken = /broken/i.test(view);
+  const shaft = broken ? `<rect x="14" y="-4" width="20" height="8" fill="${metal}"/><rect x="40" y="-4" width="24" height="8" fill="${metal}" transform="rotate(12 40 0)"/>` : `<rect x="14" y="-4" width="50" height="8" fill="${metal}"/><rect x="52" y="4" width="5" height="9" fill="${metal}"/><rect x="60" y="4" width="4" height="6" fill="${metal}"/>`;
+  return uri(120, 160, `<g transform="translate(35 80) rotate(${rot === 180 ? 0 : rot / 3})"><circle cx="0" cy="0" r="16" fill="none" stroke="${metal}" stroke-width="7"/>${shaft}</g>` + tag(120, 160, view), bg);
+}
+function art(ref, slot, seed, o = {}) {
+  if (ref.type === 'character') return slot.startsWith('expr:') ? charArt(ref.art, 'expr', seed, { ...o, expr: slot.slice(5) }) : charArt(ref.art, slot.startsWith('variant:') ? 'front' : slot, seed, o);
+  if (ref.type === 'location') return locArt(ref, slot.replace(/^area:/, ''), seed);
+  return propArt(ref.art, slot.replace(/^state:/, ''), seed, o);
+}
+
+/* ---------- sample data ---------- */
+const shots = [
+  { id: '1.1', scene: 1, chars: ['maya'], loc: 'home', area: 'Kitchen', props: [] },
+  { id: '1.2', scene: 1, chars: ['maya', 'omar'], loc: 'home', area: 'Living room', props: [] },
+  { id: '2.1', scene: 2, chars: ['omar'], loc: 'cafe', area: 'Counter', props: [] },
+  { id: '3.1', scene: 3, chars: ['maya'], loc: 'roof', area: 'Edge', props: ['key'] },
+  { id: '3.2', scene: 3, chars: ['maya', 'omar'], loc: 'roof', area: 'Edge', props: ['key'] },
+  { id: '4.1', scene: 4, chars: ['maya'], loc: 'cafe', area: 'Window table', props: [] },
+  { id: '4.2', scene: 4, chars: ['maya', 'waiter'], loc: 'cafe', area: 'Window table', props: [] },
+  { project: 'xxx', id: '1.1', scene: 1, chars: ['nour'], loc: 'desert', area: 'Roadside', props: [] },
+  { project: 'xxx', id: '1.2', scene: 1, chars: ['nour'], loc: 'desert', area: 'Gas station', props: [] },
+  { project: 'xxx', ep: 2, id: '1.1', scene: 1, chars: ['nour'], loc: 'desert', area: 'Roadside', props: [] },
+].map(mkShot);
+function mkShot(s) { s = { project: 'mos', ep: 1, ...s, stale: {} }; s.uid = `${s.project}-${s.ep}-${s.id}`; return s; }
+const filled = (slots, seed = 1) => Object.fromEntries(slots.map(s => [s, { seed }]));
+const refs = [
+  { id: 'maya', type: 'character', name: 'Maya', owner: 'Abdallah', status: 'approved', ver: 1, approvedOnce: true, ai: false,
+    art: { hue: 205, style: 0, hairHue: 15, hairL: 22 },
+    desc: 'Late 20s, lean, sharp jaw, dark brown hair in a low bun, green eyes, small mole above lip. Always looks slightly tired.',
+    slots: { front: { seed: 1 }, side: { seed: 1 }, back: { seed: 1 }, ...Object.fromEntries(EXPR_DEFAULT.map(e => ['expr:' + e, { seed: 1 }])) },
+    expressions: [...EXPR_DEFAULT], motion: 'Quick small steps, hands in jacket pockets, slouches when listening, still when angry.',
+    outfits: [{ n: 'Main', d: 'Navy rain jacket, grey hoodie, black jeans, worn boots' }, { n: 'Work', d: 'Café apron over a white shirt' }],
+    voice: { age: 'Late 20s, female', pitch: 'Low, slightly husky', accent: 'Light British', pace: 'Fast, cuts herself off', range: 'Dry humor, rarely shouts', sample: 'Don\'t. Just… don\'t.' },
+    variants: [{ id: 'v-default', name: 'Default', from: 1, ep: 1, status: 'approved', desc: 'Base look', img: { seed: 1 } }],
+    versions: [{ v: 1, who: 'Abdallah', note: 'First approved sheet' }] },
+  { id: 'omar', type: 'character', name: 'Omar', owner: 'Abdallah', status: 'review', ver: 0, approvedOnce: false, ai: false,
+    art: { hue: 30, style: 2, hairHue: 20, hairL: 15, skin: '#c99a72' },
+    desc: 'From Brainstorm card: early 30s, broad, close-cropped black hair and beard, warm eyes, laughs too loud. Café owner.',
+    slots: { front: { seed: 2 } }, expressions: [...EXPR_DEFAULT], motion: '', outfits: [{ n: 'Main', d: 'Rolled-up sleeves, apron, sneakers' }],
+    voice: { age: 'Early 30s, male', pitch: 'Warm, mid', accent: '', pace: 'Relaxed', range: 'Big laugh, softens fast', sample: '' },
+    variants: [{ id: 'v-default', name: 'Default', from: 1, ep: 1, status: 'review', desc: 'Base look', img: null }], versions: [] },
+  { id: 'waiter', type: 'character', name: 'Waiter', owner: 'Abdallah', status: 'draft', ver: 0, approvedOnce: false, ai: true,
+    art: { hue: 0, style: 1, hairHue: 40, hairL: 55 },
+    desc: 'Teenager, gangly, oversized café shirt, headphones around neck, avoids eye contact.',
+    slots: {}, expressions: [...EXPR_DEFAULT], motion: '', outfits: [], voice: { age: '', pitch: '', accent: '', pace: '', range: '', sample: '' },
+    variants: [{ id: 'v-default', name: 'Default', from: 4, ep: 1, status: 'draft', desc: 'Base look', img: null }], versions: [] },
+  { id: 'home', type: 'location', name: "Maya's home", owner: 'Abdallah', status: 'approved', ver: 1, approvedOnce: true, ai: false, hue: 30,
+    desc: 'Small top-floor flat, cluttered, plants everywhere, one big window facing the rooftops.',
+    areas: [{ n: 'Living room' }, { n: 'Kitchen' }, { n: 'Bedroom' }], regulars: ['Maya', 'Omar'],
+    slots: { Layout: { seed: 1 }, 'area:Living room': { seed: 1 }, 'area:Kitchen': { seed: 1 }, 'area:Bedroom': { seed: 2 } },
+    versions: [{ v: 1, who: 'Abdallah', note: 'Layout + 3 areas' }] },
+  { id: 'cafe', type: 'location', name: 'Café Luna', owner: 'Hadi', status: 'draft', ver: 0, approvedOnce: false, ai: false, hue: 140,
+    desc: 'Corner café, warm lights, chalkboard menu, rain-streaked windows.', areas: [{ n: 'Counter' }, { n: 'Window table' }], regulars: ['Omar'], slots: {}, versions: [] },
+  { id: 'roof', type: 'location', name: 'Rooftop', owner: 'Abdallah', status: 'awaiting', ver: 0, approvedOnce: false, ai: true, hue: 220,
+    desc: 'Flat tar roof, low wall, water tank, city skyline behind.', areas: [{ n: 'Edge' }, { n: 'Water tank' }], regulars: [], slots: {}, versions: [] },
+  { id: 'key', type: 'prop', name: 'Brass key', owner: 'Hadi', status: 'approved', ver: 1, approvedOnce: true, ai: false, art: { hue: 50 },
+    desc: 'Old brass key, round bow, two teeth, green patina.', states: [{ n: 'New' }, { n: 'Broken' }],
+    slots: { front: { seed: 1 }, side: { seed: 1 }, back: { seed: 1 }, scale: { seed: 1 }, 'state:New': { seed: 1 } }, versions: [{ v: 1, who: 'Hadi', note: 'Object sheet' }] },
+].map(r => ({ project: 'mos', ...r }));
+refs.push(
+  { project: 'xxx', id: 'nour', type: 'character', name: 'Nour', owner: 'Hadi', status: 'approved', ver: 2, approvedOnce: true, ai: false,
+    art: { hue: 330, style: 1, hairHue: 10, hairL: 12, skin: '#d8a982' },
+    desc: 'Mid 20s, long black hair, sharp eyebrows, silver hoop earrings, always in a leather jacket.',
+    slots: { front: { seed: 1 }, side: { seed: 1 }, back: { seed: 1 }, ...Object.fromEntries(EXPR_DEFAULT.map(e => ['expr:' + e, { seed: 1 }])) },
+    expressions: [...EXPR_DEFAULT], motion: 'Long strides, never sits still.', outfits: [{ n: 'Main', d: 'Black leather jacket, white tee, boots' }],
+    voice: { age: 'Mid 20s, female', pitch: 'Bright, clear', accent: '', pace: 'Measured', range: 'Calm until she isn\'t', sample: '' },
+    variants: [{ id: 'v-default', name: 'Default', from: 1, ep: 1, status: 'approved', desc: 'Base look', img: { seed: 1 } }],
+    versions: [{ v: 1, who: 'Hadi', note: 'First sheet' }, { v: 2, who: 'Hadi', note: 'Changed: earrings' }] },
+  { project: 'xxx', id: 'desert', type: 'location', name: 'Desert road', owner: 'Hadi', status: 'draft', ver: 0, approvedOnce: false, ai: false, hue: 35,
+    desc: 'Empty two-lane road, cracked asphalt, one abandoned gas station.', areas: [{ n: 'Roadside' }, { n: 'Gas station' }], regulars: ['Nour'], slots: {}, versions: [] },
+);
+const PROJECTS = [
+  { id: 'mos', name: 'Al Mosalsal', kind: 'Series', eps: 3, cover: 'maya', edited: 'Today' },
+  { id: 'xxx', name: 'XXX', kind: 'Series', eps: 2, cover: 'nour', edited: '3 days ago' },
+];
+const P = id => PROJECTS.find(p => p.id === id);
+const key = (ep, sc) => ep * 1000 + sc;
+
+const S = { me: 'Abdallah', project: null, tab: 'character', open: null, gen: { target: null, opts: null, busy: false, fix: '' }, adding: false, events: {} };
+const R = id => refs.find(r => r.id === id);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+
+/* ---------- derived ---------- */
+function usedIn(ref) {
+  return shots.filter(s => s.project === ref.project).filter(s => ref.type === 'character' ? s.chars.includes(ref.id) : ref.type === 'location' ? s.loc === ref.id : s.props.includes(ref.id));
+}
+function variantFor(ref, s) {
+  return (ref.variants || []).filter(v => key(v.ep, v.from) <= key(s.ep, s.scene)).sort((a, b) => key(b.ep, b.from) - key(a.ep, a.from))[0];
+}
+const staleCount = ref => usedIn(ref).filter(s => s.stale[ref.id]).length;
+const baseSlot = ref => ref.type === 'location' ? 'Layout' : 'front';
+const baseApproved = ref => ref.approvedOnce;
+function targets(ref) {
+  if (ref.type === 'character') return ['front', 'side', 'back', ...ref.expressions.map(e => 'expr:' + e), ...ref.variants.filter(v => v.id !== 'v-default').map(v => 'variant:' + v.id)];
+  if (ref.type === 'location') return ['Layout', ...ref.areas.map(a => 'area:' + a.n)];
+  return ['front', 'side', 'back', 'top', 'scale', ...ref.states.map(s => 'state:' + s.n)];
+}
+function label(ref, t) {
+  if (t.startsWith('variant:')) return 'Variant · ' + (ref.variants.find(v => v.id === t.slice(8))?.name || '');
+  return t.replace(/^expr:/, 'Expression · ').replace(/^area:/, 'Area · ').replace(/^state:/, 'State · ').replace(/^./, c => c.toUpperCase());
+}
+
+/* ---------- render ---------- */
+function pills(ref) {
+  const out = [`<span class="pill ${ref.status}">${STATUS[ref.status]}</span>`];
+  if (ref.approvedOnce) out.push(`<span class="pill">v${ref.ver}</span>`);
+  const st = staleCount(ref); if (st) out.push(`<span class="pill stale">⚠️ ${st} stale shot${st > 1 ? 's' : ''}</span>`);
+  if (!usedIn(ref).length) out.push(`<span class="pill unused">💤 Not used</span>`);
+  if (ref.ai) out.push(`<span class="pill ai">AI-suggested</span>`);
+  if (ref.copiedFrom) out.push(`<span class="pill">Copied from ${esc(ref.copiedFrom)}</span>`);
+  return out.join('');
+}
+function thumb(ref) {
+  const s = ref.slots[baseSlot(ref)];
+  return s ? `<img alt="" src="${art(ref, baseSlot(ref), s.seed, s)}">` : 'No image yet';
+}
+function gallery() {
+  const list = refs.filter(r => r.type === S.tab && r.project === S.project);
+  return `
+  <div class="tabs">${Object.entries(TYPES).map(([k, v]) => `<button data-act="tab" data-v="${k}" class="${S.tab === k ? 'on' : ''}">${v} <span class="muted small">${refs.filter(r => r.type === k && r.project === S.project).length}</span></button>`).join('')}
+    <span class="spacer"></span><button class="primary" data-act="add">+ Add</button></div>
+  ${S.adding ? `<form class="addform" id="addform"><select id="add-type" style="width:auto">${Object.entries(TYPES).map(([k, v]) => `<option value="${k}" ${k === S.tab ? 'selected' : ''}>${v.slice(3, -1)}</option>`).join('')}</select><input id="add-name" placeholder="Name, e.g. Umbrella" required><button class="primary">Create</button><button type="button" class="ghost" data-act="add">Cancel</button></form>` : ''}
+  <div class="grid">${list.map(r => `<button class="card" data-act="open" data-v="${r.id}"><div class="thumb">${thumb(r)}</div><div class="body"><div class="name">${esc(r.name)}</div><div class="badges">${pills(r)}</div><div class="small muted">Owner: ${r.owner} · used in ${usedIn(r).length} shot${usedIn(r).length === 1 ? '' : 's'}</div></div></button>`).join('') || '<p class="muted">Nothing here yet. Props are always added by hand with + Add.</p>'}</div>
+  ${S.project !== 'mos' ? '' : `<div class="events"><h2>Script events · testing only</h2>
+    <div class="note">These stand in for things that happen in the Script section, so you can see how References reacts.</div>
+    <div class="row">
+      <button data-act="ev" data-v="scar" ${S.events.scar ? 'disabled' : ''}>Ep 1 · lock sc. 5 in Main · "the blade leaves a scar on Maya's cheek"</button>
+      <button data-act="ev" data-v="hale" ${S.events.hale ? 'disabled' : ''}>Ep 2 · lock sc. 1 · new speaking character HALE + new location "Police station – Interview room"</button>
+      <button data-act="ev" data-v="cut4" ${S.events.cut4 ? 'disabled' : ''}>Ep 1 · cut scene 4</button>
+    </div></div>`}`;
+}
+function slotBox(ref, t, wide) {
+  const s = ref.slots[t], on = S.gen.target === t;
+  return `<div class="slot ${wide ? 'wide' : ''} ${on ? 'target' : ''}"><div class="img">${s ? `<img alt="${esc(label(ref, t))}" src="${art(ref, t, s.seed, s)}">` : '—'}</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:4px">${esc(label(ref, t).replace(/^(Expression|Area|State) · /, ''))}<button class="ghost" data-act="target" data-v="${esc(t)}">${s ? 'Redo' : 'Make'}</button></div></div>`;
+}
+function detail(ref) {
+  const used = usedIn(ref);
+  const owner = `<span class="owner">Owner <select id="owner">${['Abdallah', 'Hadi'].map(m => `<option ${m === ref.owner ? 'selected' : ''}>${m}</option>`).join('')}</select>
+    <select id="copyto" aria-label="Copy to another project"><option value="">Copy to project…</option>${PROJECTS.filter(p => p.id !== ref.project).map(p => `<option value="${p.id}">${esc(p.name)}</option>`).join('')}</select></span>`;
+  let body = `<section class="sec"><div class="head"><button class="ghost" data-act="back">← Gallery</button><h1>${esc(ref.name)}</h1><div class="badges">${pills(ref)}</div>${owner}</div>
+    <label class="small muted" for="desc">Description ${ref.ai ? '<span class="pill ai">AI-suggested, edit before generating</span>' : ''}</label>
+    <textarea id="desc">${esc(ref.desc)}</textarea></section>`;
+  if (ref.type === 'character') {
+    body += `<section class="sec"><h2>Sheet</h2><div class="slots">${['front', 'side', 'back'].map(t => slotBox(ref, t)).join('')}</div><div class="note">Front first. Side and back are generated from the approved front so the face matches.</div></section>
+    <section class="sec"><h2>Expressions</h2><div class="slots">${ref.expressions.map(e => slotBox(ref, 'expr:' + e)).join('')}</div>
+      <form id="exprform" style="display:flex;gap:8px"><input id="expr-name" placeholder="Add expression, e.g. Smirk"><button>Add</button></form></section>
+    <section class="sec"><h2>Motion</h2><textarea id="motion" placeholder="How they move: walk, posture, gestures, energy">${esc(ref.motion)}</textarea></section>
+    <section class="sec"><h2>Outfits / style</h2>${ref.outfits.map((o, i) => `<div class="rowline"><b style="min-width:70px">${esc(o.n)}</b><div class="grow">${esc(o.d)}</div></div>`).join('') || '<div class="muted small">No outfits yet.</div>'}
+      <form id="outfitform" style="display:flex;gap:8px;flex-wrap:wrap"><input id="of-n" placeholder="Name" style="flex:0 1 120px"><input id="of-d" placeholder="Description" style="flex:1 1 200px"><button>Add</button></form></section>
+    <section class="sec"><h2>🎙️ Voice</h2><div class="fields">${[['age', 'Age / gender feel'], ['pitch', 'Pitch / tone'], ['accent', 'Accent'], ['pace', 'Pace / rhythm'], ['range', 'Emotional range'], ['sample', 'Sample line']].map(([k, l]) => `<label>${l}<input data-voice="${k}" value="${esc(ref.voice[k])}"></label>`).join('')}</div>
+      <div class="note">Description only. Voice samples are generated in the Audio section.</div></section>
+    <section class="sec"><h2>Variants (lasting changes)</h2>${ref.variants.map(v => {
+      const img = v.id === 'v-default' ? ref.slots.front : v.img;
+      return `<div class="rowline">${img ? `<img alt="" src="${art(ref, 'front', img.seed, img)}">` : '<img alt="">'}<div class="grow"><b>${esc(v.name)}</b> <span class="pill ${v.status}">${STATUS[v.status]}</span><div class="small muted">${esc(v.desc)}</div></div>
+      <label class="small muted">from Ep <input class="sc" type="number" min="1" data-fromep="${v.id}" value="${v.ep}" ${v.id === 'v-default' ? 'disabled' : ''}></label><label class="small muted">sc. <input class="sc" type="number" min="1" data-from="${v.id}" value="${v.from}" ${v.id === 'v-default' ? 'disabled' : ''}></label>
+      ${v.id !== 'v-default' ? `<button class="sm" data-act="target" data-v="variant:${v.id}">Generate</button>${v.status === 'review' ? `<button class="sm primary" data-act="approve-variant" data-v="${v.id}" ${S.me !== ref.owner ? 'disabled' : ''}>Approve</button>` : ''}` : ''}</div>`; }).join('')}
+      <div class="note">Created automatically when a locked scene in Main introduces a lasting change. The start scene stays put if scenes move (flashbacks); change it by hand. Temporary looks (wet, crying) come from the script.</div></section>`;
+  } else if (ref.type === 'location') {
+    body += `<section class="sec"><h2>Layout view</h2><div class="slots" style="grid-template-columns:minmax(0,260px)">${slotBox(ref, 'Layout', true)}</div><div class="note">One view of the whole place so the layout stays consistent. Areas are generated from it. Time of day and weather come from the script.</div></section>
+    <section class="sec"><h2>Areas</h2><div class="slots">${ref.areas.map(a => slotBox(ref, 'area:' + a.n, true)).join('')}</div>
+      <form id="areaform" style="display:flex;gap:8px"><input id="area-name" placeholder="Add area, e.g. Bathroom"><button>Add</button></form></section>
+    <section class="sec"><h2>Regulars</h2><div class="badges">${ref.regulars.map(n => `<span class="pill">${esc(n)}</span>`).join('') || '<span class="muted small">None yet</span>'}</div></section>`;
+  } else {
+    body += `<section class="sec"><h2>Object sheet</h2><div class="slots">${['front', 'side', 'back', 'top', 'scale'].map(t => slotBox(ref, t)).join('')}</div></section>
+    <section class="sec"><h2>States</h2><div class="slots">${ref.states.map(s => slotBox(ref, 'state:' + s.n)).join('')}</div>
+      <form id="stateform" style="display:flex;gap:8px"><input id="state-name" placeholder="Add state, e.g. Bloody"><button>Add</button></form></section>`;
+  }
+  body += `<section class="sec"><h2>Used in · ${used.length} shot${used.length === 1 ? '' : 's'}</h2>${used.map(s => {
+      const v = ref.type === 'character' ? variantFor(ref, s) : null, st = s.stale[ref.id];
+      return `<div class="rowline"><b style="min-width:70px">Ep ${s.ep} · ${s.id}</b><div class="grow small">${s.area}${v ? ` · ${esc(v.name)}` : ''}</div>${st ? `<span class="pill stale">⚠️ Stale · ${esc(st)}</span><button class="sm" data-act="stale" data-v="${s.uid}" data-o="Kept">Keep</button><button class="sm" data-act="stale" data-v="${s.uid}" data-o="Regenerating">Regenerate</button><button class="sm" data-act="stale" data-v="${s.uid}" data-o="Adjusting">Adjust</button>` : s.done?.[ref.id] ? `<span class="pill">${s.done[ref.id]}</span>` : '<span class="pill approved">Up to date</span>'}</div>`; }).join('') || '<div class="muted small">💤 Not used by any shot. The card stays here in case a scene brings it back.</div>'}
+    ${staleCount(ref) > 1 ? `<div class="row" style="display:flex;gap:6px;flex-wrap:wrap"><span class="small muted">All stale:</span><button class="sm" data-act="stale-all" data-o="Kept">Keep</button><button class="sm" data-act="stale-all" data-o="Regenerating">Regenerate</button><button class="sm" data-act="stale-all" data-o="Adjusting">Adjust</button></div>` : ''}</section>
+    <section class="sec"><h2>Versions</h2>${ref.versions.map(v => `<div class="rowline"><b>v${v.v}</b><div class="grow small">${esc(v.note)}</div><span class="small muted">approved by ${v.who}</span></div>`).reverse().join('') || '<div class="muted small">No approved version yet.</div>'}<div class="note">Nothing is overwritten. Re-editing an approved reference creates a new version on approval.</div></section>`;
+  return `<div class="detail"><div class="stack">${body}</div>${genPanel(ref)}</div>`;
+}
+function genPanel(ref) {
+  const g = S.gen, t = g.target || baseSlot(ref), base = t === baseSlot(ref);
+  const blocked = !base && !baseApproved(ref) && !(ref.status === 'review' && false);
+  const isOwner = S.me === ref.owner, wide = ref.type === 'location';
+  return `<aside class="sec gen"><h2>✨ Generate</h2>
+    <label class="small muted" for="target">What to make</label>
+    <select id="target">${targets(ref).map(x => `<option value="${esc(x)}" ${x === t ? 'selected' : ''}>${esc(label(ref, x))}${ref.slots[x] || (x.startsWith('variant:') && ref.variants.find(v => 'variant:' + v.id === x)?.img) ? ' ✓' : ''}</option>`).join('')}</select>
+    ${blocked ? `<div class="lock">🔒 Approve the ${baseSlot(ref).toLowerCase()} view first. Everything else is generated from it so it matches.</div>` : `
+    <button class="primary" data-act="generate" ${g.busy ? 'disabled' : ''}>Generate 4 options</button>
+    ${g.busy ? '<div class="spin">Generating with OpenAI… (simulated)</div>' : ''}
+    ${g.opts ? `<div class="small muted">Pick one:</div><div class="opts">${g.opts.map((o, i) => `<button class="opt ${wide ? 'wide' : ''}" data-act="pick" data-v="${i}" aria-label="Option ${i + 1}"><img alt="" src="${art(ref, t, o.seed, o)}"></button>`).join('')}</div>` : ''}
+    <form id="fixform" style="display:flex;flex-direction:column;gap:6px"><label class="small muted" for="fix">Fix by prompt (regenerates from the current image)</label><input id="fix" placeholder="e.g. shorter hair, add scar left cheek" value="${esc(g.fix)}"><button ${!ref.slots[t] && !t.startsWith('variant:') ? 'disabled' : ''}>↻ Regenerate with fix</button></form>`}
+    <hr style="border:0;border-top:1px solid var(--line);width:100%">
+    ${ref.status === 'review' ? `<button class="primary" data-act="approve" ${isOwner ? '' : 'disabled'}>Approve${ref.approvedOnce ? ` as v${ref.ver + 1}` : ''}</button>${isOwner ? '' : `<div class="note">Only ${ref.owner} (owner) can approve. You can still generate options.</div>`}`
+      : ref.status === 'approved' ? `<div class="note">Approved v${ref.ver}. You can keep editing: changes go to review, and approving makes v${ref.ver + 1} and marks affected shots Stale.</div>` : `<div class="note">Pick an option to send it to review. ${ref.owner} (owner) approves.</div>`}
+  </aside>`;
+}
+const pl = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
+function home() {
+  return `<div class="home-head"><h1>Projects</h1><button class="primary" data-act="newproj">+ New project</button></div>
+  <div class="projects">${PROJECTS.map(p => {
+    const rs = refs.filter(r => r.project === p.id), c = R(p.cover), count = t => rs.filter(r => r.type === t).length;
+    return `<button class="card" data-act="project" data-v="${p.id}"><div class="thumb">${c ? `<img alt="" src="${art(c, 'front', 1, {})}">` : ''}</div><div class="body"><div class="name">${esc(p.name)}</div><div class="small muted">${p.kind} · ${p.eps} episodes · edited ${p.edited}</div><div class="small muted">${pl(count('character'), 'character')} · ${pl(count('location'), 'location')} · ${pl(count('prop'), 'prop')}</div></div></button>`; }).join('')}</div>`;
+}
+function topbar() {
+  const p = S.project && P(S.project);
+  return p ? `<div class="crumb"><button class="ghost" data-act="home">← Projects</button><span class="brand">${esc(p.name)} <span>· ${p.kind}, ${p.eps} episodes</span></span></div>
+    <div class="nav"><span>Brainstorm</span><span>Script</span><span class="on">References</span><span>Image</span><span>Video</span><span>Audio</span></div>`
+    : `<div class="brand">Production system <span>· home</span></div>`;
+}
+function render() {
+  document.querySelectorAll('[data-act="me"]').forEach(b => b.classList.toggle('on', b.dataset.v === S.me));
+  const ref = S.open && R(S.open);
+  document.getElementById('top').innerHTML = topbar();
+  document.getElementById('app').innerHTML = !S.project ? home() : ref ? detail(ref) : gallery();
+}
+let toastT;
+function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => t.hidden = true, 2800); }
+
+/* ---------- actions ---------- */
+function markStale(ref, why, filter = () => true) {
+  let n = 0;
+  usedIn(ref).filter(filter).forEach(s => { s.stale[ref.id] = why; if (s.done) delete s.done[ref.id]; n++; });
+  return n;
+}
+function newRef(type, name, extra = {}) {
+  const id = name.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Math.random().toString(36).slice(2, 5);
+  const base = { id, project: S.project, type, name, owner: S.me, status: 'draft', ver: 0, approvedOnce: false, ai: false, desc: '', slots: {}, versions: [] };
+  const per = type === 'character' ? { art: { hue: Math.floor(Math.random() * 360), style: 1, hairHue: 30, hairL: 30 }, expressions: [...EXPR_DEFAULT], motion: '', outfits: [], voice: { age: '', pitch: '', accent: '', pace: '', range: '', sample: '' }, variants: [{ id: 'v-default', name: 'Default', from: 1, ep: 1, status: 'draft', desc: 'Base look', img: null }] }
+    : type === 'location' ? { hue: Math.floor(Math.random() * 360), areas: [{ n: 'Main' }], regulars: [] } : { art: { hue: Math.floor(Math.random() * 360) }, states: [{ n: 'New' }] };
+  const r = { ...base, ...per, ...extra }; refs.push(r); return r;
+}
+const events = {
+  scar() {
+    const maya = R('maya');
+    shots.push(...[{ id: '5.1', scene: 5, chars: ['maya'], loc: 'roof', area: 'Water tank', props: [], stale: {} }, { id: '5.2', scene: 5, chars: ['maya', 'omar'], loc: 'roof', area: 'Edge', props: ['key'] }].map(mkShot));
+    maya.variants.push({ id: 'v-scar', name: 'Scarred', from: 5, ep: 1, status: 'awaiting', desc: 'Same as Default + thin scar, left cheek (from Ep 1 · sc. 5)', img: null });
+    if (maya.status === 'approved') maya.status = 'awaiting';
+    return 'Maya: variant "Scarred" created from sc. 5, awaiting generation';
+  },
+  hale() {
+    const r = newRef('character', 'Hale', { ai: true, desc: 'Detective, mid 50s, heavyset, grey stubble, rumpled trench coat, reading glasses on a cord. (Script only says: "HALE, a detective.")' });
+    r.variants[0].from = 1; r.variants[0].ep = 2;
+    const l = newRef('location', 'Police station', { ai: true, desc: 'Fluorescent-lit station, worn linoleum, glass-walled interview room.', areas: [{ n: 'Interview room' }] });
+    shots.push(mkShot({ ep: 2, id: '1.1', scene: 1, chars: ['maya', r.id], loc: l.id, area: 'Interview room', props: [] }));
+    return 'Hale + Police station created automatically, descriptions AI-suggested';
+  },
+  cut4() {
+    for (let i = shots.length - 1; i >= 0; i--) if (shots[i].project === 'mos' && shots[i].ep === 1 && shots[i].scene === 4) shots.splice(i, 1);
+    return 'Scene 4 cut. Waiter has no shots left and shows Not used';
+  },
+};
+function simulate(ref, t, fix) {
+  S.gen.busy = true; S.gen.opts = null; render();
+  setTimeout(() => {
+    const scar = (t.startsWith('variant:') && /scar/i.test(ref.variants.find(v => 'variant:' + v.id === t)?.desc || '')) || /scar/i.test(fix || '') || (ref.type === 'character' && ref.variants.some(v => v.id === 'v-scar' && v.status === 'approved') && false);
+    const start = Math.floor(Math.random() * 20) + 3;
+    S.gen.opts = [0, 1, 2, 3].map(i => ({ seed: fix && ref.slots[t] ? ref.slots[t].seed + (i ? i * 7 : 0) : start + i, scar }));
+    S.gen.busy = false; if (S.open === ref.id) render();
+  }, 1100);
+}
+function pick(ref, i) {
+  const t = S.gen.target || baseSlot(ref), o = S.gen.opts[i];
+  if (t.startsWith('variant:')) {
+    const v = ref.variants.find(v => 'variant:' + v.id === t); v.img = o; v.status = 'review';
+    toast(`${v.name} sent to review. ${ref.owner} approves it.`);
+  } else {
+    ref.slots[t] = o;
+    if (t === 'expr:' + ref.expressions[0]) ref.expressions.forEach(e => ref.slots['expr:' + e] ||= { ...o });
+    ref.status = 'review'; ref.pending = (ref.pending || []).concat(label(ref, t));
+    toast(`${label(ref, t)} sent to review`);
+  }
+  S.gen.opts = null; render();
+}
+function approve(ref) {
+  if (S.me !== ref.owner) return;
+  const what = (ref.pending || []).join(', ') || 'changes';
+  if (ref.approvedOnce) {
+    ref.ver++; ref.versions.push({ v: ref.ver, who: S.me, note: 'Changed: ' + what });
+    const n = markStale(ref, `made with v${ref.ver - 1}`);
+    toast(`Approved v${ref.ver}. ${n} shot${n === 1 ? '' : 's'} marked Stale.`);
+  } else {
+    ref.ver = 1; ref.approvedOnce = true; ref.versions.push({ v: 1, who: S.me, note: 'First approval: ' + what });
+    if (ref.variants) ref.variants[0].status = 'approved';
+    toast(`${ref.name} approved (v1). Other views can be generated from it now.`);
+  }
+  ref.status = 'approved'; ref.pending = []; ref.ai = false; render();
+}
+function approveVariant(ref, id) {
+  const v = ref.variants.find(v => v.id === id); if (S.me !== ref.owner) return;
+  v.status = 'approved';
+  const n = markStale(ref, `now uses ${v.name}`, s => variantFor(ref, s) === v);
+  if (ref.status === 'awaiting') ref.status = 'approved';
+  toast(`${v.name} approved. ${n} shot${n === 1 ? '' : 's'} from Ep ${v.ep} · sc. ${v.from} on marked Stale.`); render();
+}
+
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-act]'); if (!b || b.disabled) return;
+  const ref = S.open && R(S.open), v = b.dataset.v;
+  switch (b.dataset.act) {
+    case 'me': S.me = v; break;
+    case 'tab': S.tab = v; break;
+    case 'add': S.adding = !S.adding; break;
+    case 'open': S.open = v; S.gen = { target: null, opts: null, busy: false, fix: '' }; window.scrollTo(0, 0); break;
+    case 'back': S.open = null; break;
+    case 'home': S.project = null; S.open = null; S.adding = false; break;
+    case 'project': S.project = v; S.open = null; S.tab = 'character'; break;
+    case 'newproj': toast('Creating projects is not part of this mockup'); return;
+    case 'ev': S.events[v] = true; toast(events[v]()); break;
+    case 'target': S.gen.target = v; S.gen.opts = null; break;
+    case 'generate': simulate(ref, S.gen.target || baseSlot(ref)); if (ref.status !== 'review') ref.prevStatus = ref.status; return;
+    case 'pick': pick(ref, +v); return;
+    case 'approve': approve(ref); return;
+    case 'approve-variant': approveVariant(ref, v); return;
+    case 'stale': { const s = shots.find(s => s.uid === v); delete s.stale[ref.id]; (s.done ||= {})[ref.id] = b.dataset.o; toast(`Ep ${s.ep} · ${s.id}: ${b.dataset.o}`); break; }
+    case 'stale-all': usedIn(ref).filter(s => s.stale[ref.id]).forEach(s => { delete s.stale[ref.id]; (s.done ||= {})[ref.id] = b.dataset.o; }); toast(`All stale shots: ${b.dataset.o}`); break;
+    default: return;
+  }
+  render();
+});
+document.addEventListener('change', e => {
+  const ref = S.open && R(S.open); if (!ref) return;
+  const el = e.target;
+  if (el.id === 'target') { S.gen.target = el.value; S.gen.opts = null; render(); }
+  else if (el.id === 'owner') { ref.owner = el.value; toast(`Owner is now ${el.value}`); render(); }
+  else if (el.id === 'desc' && el.value !== ref.desc) {
+    ref.desc = el.value; ref.ai = false;
+    if (ref.status === 'approved') { ref.status = 'awaiting'; toast('Description changed. Awaiting generation; approved images stay until a new version is approved.'); }
+    render();
+  }
+  else if (el.id === 'motion') ref.motion = el.value;
+  else if (el.dataset.voice) ref.voice[el.dataset.voice] = el.value;
+  else if (el.dataset.from || el.dataset.fromep) { const v = ref.variants.find(v => v.id === (el.dataset.from || el.dataset.fromep)); v[el.dataset.from ? 'from' : 'ep'] = Math.max(1, +el.value || 1); toast(`${v.name} now starts at Ep ${v.ep} · sc. ${v.from}`); render(); }
+  else if (el.id === 'copyto' && el.value) {
+    const c = JSON.parse(JSON.stringify(ref)); c.id = ref.id + '-' + Math.random().toString(36).slice(2, 5); c.project = el.value; c.copiedFrom = P(ref.project).name; c.owner = S.me;
+    refs.push(c); toast(`Copied to ${P(el.value).name}. The two copies now change independently.`); render();
+  }
+});
+document.addEventListener('submit', e => {
+  e.preventDefault();
+  const ref = S.open && R(S.open), id = e.target.id, val = sel => document.getElementById(sel).value.trim();
+  if (id === 'addform') {
+    const name = val('add-name'); if (!name) return;
+    const r = newRef(document.getElementById('add-type').value, name); S.adding = false; S.tab = r.type; S.open = r.id; toast(`${name} created`);
+  } else if (id === 'exprform' && val('expr-name')) ref.expressions.push(val('expr-name').replace(/^./, c => c.toUpperCase()));
+  else if (id === 'areaform' && val('area-name')) ref.areas.push({ n: val('area-name') });
+  else if (id === 'stateform' && val('state-name')) ref.states.push({ n: val('state-name') });
+  else if (id === 'outfitform' && val('of-n')) ref.outfits.push({ n: val('of-n'), d: val('of-d') });
+  else if (id === 'fixform') {
+    const t = S.gen.target || baseSlot(ref); S.gen.fix = val('fix'); simulate(ref, t, S.gen.fix || 'variation'); return;
+  } else return;
+  render();
+});
+render();
+</script>

@@ -1,0 +1,24 @@
+# π production on Fly.io: the app lives here, the AI stays on your computers (npm run bot, on each person's Claude login).
+app = "pi-production-hadi"   # names are global on Fly
+primary_region = "fra"
+
+[build]
+
+[env]
+  PORT = "8080"
+  PI_PROJECTS_DIR = "/data/projects"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "off"   # stays up: live sync + the bots' long-polls live in memory
+  auto_start_machines = true
+  min_machines_running = 1
+
+[[mounts]]
+  source = "pi_data"
+  destination = "/data"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"

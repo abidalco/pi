@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node bot/wait.mjs)",
+      "Bash(node bot/wait.mjs:*)",
+      "Bash(node bot/done.mjs)",
+      "Bash(node bot/done.mjs:*)",
+      "Bash(npm run wait)",
+      "Bash(npm run done:*)"
+    ]
+  }
+}

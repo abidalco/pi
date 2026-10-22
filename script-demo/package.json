@@ -1,0 +1,16 @@
+{
+  "name": "pi-script",
+  "private": true,
+  "type": "module",
+  "description": "π production system · Section 2 Script — testable demo. Zero dependencies.",
+  "scripts": {
+    "start": "node server.mjs",
+    "reset": "node server.mjs --reset",
+    "bot": "bash bot/run.sh",
+    "wait": "node bot/wait.mjs",
+    "done": "node bot/done.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
